@@ -1,5 +1,6 @@
 import { STYLES } from "../constants/styles";
 import { getModeTheme } from "../utils/modeTheme";
+import { isStyleMode } from "../constants/modes";
 
 const POPULAR_STYLE_IDS = [
   "moderne",
@@ -22,7 +23,7 @@ export default function VariantPicker({
 }) {
   const theme = getModeTheme(mode);
 
-  if (mode !== "meubler") return null;
+  if (!isStyleMode(mode)) return null;
 
   const toggleStyle = (styleId) => {
     if (disabled) return;

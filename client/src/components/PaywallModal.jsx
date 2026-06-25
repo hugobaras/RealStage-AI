@@ -30,7 +30,7 @@ export default function PaywallModal({ open, onClose, mode = "meubler" }) {
         </h2>
         <p className="mt-2 text-sm text-muted">
           Vous avez utilisé vos 3 générations d&apos;essai. Choisissez un
-          abonnement pour continuer à meubler et désencombrer vos photos.
+          abonnement pour continuer à meubler, remplacer et vider vos photos.
         </p>
 
         <ul className="surface-card mt-5 space-y-2 p-3 text-sm text-zinc-300">

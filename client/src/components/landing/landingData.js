@@ -11,6 +11,12 @@ export const SHOWCASE_ITEMS = [
     after: "/hero_compare/salon_2.png",
   },
   {
+    id: "remplacer",
+    title: "Remplacer",
+    before: "/hero_compare/salon_2.png",
+    after: "/hero_compare/chambre_2.png",
+  },
+  {
     id: "desencombrer",
     title: "Vider",
     before: "/hero_compare/chambre_1.png",
@@ -24,6 +30,12 @@ export const FEATURES = [
     title: "Home staging virtuel",
     description:
       "Meublez automatiquement vos pièces vides avec des styles adaptés au marché français.",
+  },
+  {
+    icon: "arrow",
+    title: "Remplacement de mobilier",
+    description:
+      "Changez le style du mobilier existant au même emplacement, sans ajout de décoration ni modification de l'agencement.",
   },
   {
     icon: "sparkles",
@@ -68,7 +80,7 @@ export const STEPS = [
     step: "2",
     title: "Choisissez mode & style",
     description:
-      "Meubler ou désencombrer, sélectionnez le type de pièce et l'un des 30+ styles professionnels.",
+      "Meubler, remplacer ou vider — sélectionnez le type de pièce et l'un des 30+ styles professionnels.",
   },
   {
     step: "3",
@@ -111,7 +123,7 @@ export const TESTIMONIALS = [
 export const FAQ_ITEMS = [
   {
     q: "Qu'est-ce que RealStage AI ?",
-    a: "RealStage AI est un studio IA de home staging virtuel pour les professionnels de l'immobilier. Meublez des pièces vides, désencombrez des espaces encombrés et transformez vos visuels en quelques secondes, sans compétence technique.",
+    a: "RealStage AI est un studio IA de home staging virtuel pour les professionnels de l'immobilier. Meublez des pièces vides, remplacez le mobilier existant, désencombrez des espaces encombrés et transformez vos visuels en quelques secondes, sans compétence technique.",
   },
   {
     q: "Puis-je essayer gratuitement ?",
@@ -126,8 +138,12 @@ export const FAQ_ITEMS = [
     a: "Oui, le mode Meubler ajoute mobilier et décoration adaptés au type de pièce et au style choisi, en respectant les volumes et la lumière existants.",
   },
   {
+    q: "Puis-je remplacer le mobilier sans changer l'agencement ?",
+    a: "Oui, le mode Remplacer échange le mobilier visible par un équivalent dans le style choisi, en conservant position, taille et emplacement. Aucune décoration supplémentaire n'est ajoutée.",
+  },
+  {
     q: "Puis-je désencombrer une pièce meublée ?",
-    a: "Oui, le mode Désencombrer retire le mobilier tout en préservant l'architecture : murs, fenêtres, portes et sols restent intacts.",
+    a: "Oui, le mode Vider retire le mobilier tout en préservant l'architecture : murs, fenêtres, portes et sols restent intacts.",
   },
   {
     q: "Les images générées sont-elles utilisables commercialement ?",

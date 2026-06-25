@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
+  ArrowLeftRight,
   Check,
   ChevronDown,
   History,
@@ -34,6 +35,7 @@ import {
 
 const FEATURE_ICONS = {
   sofa: Sofa,
+  arrow: ArrowLeftRight,
   sparkles: Sparkles,
   palette: Palette,
   home: Home,
@@ -48,7 +50,7 @@ const NAV_LINKS = [
   { href: "#faq", label: "FAQ" },
 ];
 
-const HERO_WORDS = ["meubler", "désencombrer", "sublimer", "valoriser"];
+const HERO_WORDS = ["meubler", "remplacer", "désencombrer", "valoriser"];
 
 function Reveal({ children, className = "", delay = 0 }) {
   const [ref, inView] = useInView();
@@ -847,6 +849,7 @@ export default function LandingPage() {
                 </h4>
                 <ul className="mt-3 space-y-2 text-sm text-zinc-400">
                   <li>Meubler IA</li>
+                  <li>Remplacer le mobilier</li>
                   <li>Vider</li>
                   <li>30+ styles</li>
                 </ul>

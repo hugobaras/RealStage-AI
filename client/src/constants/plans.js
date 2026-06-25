@@ -10,7 +10,7 @@ export const PLANS = [
     features: [
       "30 générations / mois",
       "10 réflexions approfondies / mois",
-      "Meubler & vider",
+      "Meubler, remplacer & vider",
       "Historique sauvegardé",
       "Export HD",
     ],

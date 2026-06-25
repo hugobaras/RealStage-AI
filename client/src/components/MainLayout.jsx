@@ -23,7 +23,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { useSubscription } from "../contexts/SubscriptionContext";
 import { usePreferences } from "../hooks/usePreferences";
 import { useAgencySettings } from "../hooks/useAgencySettings";
-import { MODES } from "../constants/modes";
+import { MODES, isStyleMode } from "../constants/modes";
+import { getAppBgClass } from "../utils/modeTheme";
 import {
   LISTING_STEPS,
   ESSENTIAL_ROOMS,
@@ -530,7 +531,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
         imageUrl: data.imageUrl,
         mode,
         roomType,
-        style: mode === "meubler" ? effectiveStyle : null,
+        style: isStyleMode(mode) ? effectiveStyle : null,
         variantGroupId: variantGroupId ?? null,
         variantIndex: variantIndex ?? null,
         propertyId: activePropertyId ?? null,
@@ -718,7 +719,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   ]);
 
   const runGenerateVariants = useCallback(async () => {
-    if (!baseImage || loading || mode !== "meubler") return;
+    if (!baseImage || loading || !isStyleMode(mode)) return;
     if (variantStyles.length < 2) {
       setError("Sélectionnez au moins 2 styles pour les variantes.");
       return;
@@ -1055,7 +1056,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   return (
     <div
       data-mode={mode}
-      className={`app-themed flex h-[100dvh] flex-col overflow-hidden lg:h-screen lg:flex-row ${mode === "desencombrer" ? "app-bg-declutter" : "app-bg"}`}
+      className={`app-themed flex h-[100dvh] flex-col overflow-hidden lg:h-screen lg:flex-row ${getAppBgClass(mode)}`}
     >
       <div className="app-grid-bg pointer-events-none fixed inset-0 opacity-50" />
       <AppShell activeMode={mode} onModeChange={setMode}>

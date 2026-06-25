@@ -443,7 +443,7 @@ export default function ControlPanel({
           theme={theme}
         />
 
-        {!isDeclutter && (
+        {!isDeclutter && showStyleOptions && (
           <StyleSelect
             value={style}
             onChange={onStyleChange}
@@ -460,7 +460,7 @@ export default function ControlPanel({
           theme={theme}
         />
 
-        {!isDeclutter && (
+        {showStyleOptions && (
           <CollapsibleSection
             title="Variantes A / B / C"
             hint="Comparer 2 ou 3 styles sur la même photo"
@@ -486,7 +486,7 @@ export default function ControlPanel({
           }
           theme={theme}
         >
-          {!isDeclutter && (
+          {!isDeclutter && mode === "meubler" && (
             <RoomSqmField
               value={roomSqm}
               roomType={roomType}
@@ -564,7 +564,7 @@ export default function ControlPanel({
             Générer tout ({totalQueuePhotos ?? queueCount + 1})
           </button>
         )}
-        {!isDeclutter &&
+        {showStyleOptions &&
           variantStyles?.length >= 2 &&
           onVariantsGenerateClick && (
             <button
