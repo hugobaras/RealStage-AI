@@ -1,0 +1,416 @@
+import Stripe from "stripe";
+import { getStripeConfig } from "../config.js";
+import { getPlanRank, isValidPlanId } from "../config/plans.js";
+import { applyStripeSubscription } from "./subscriptionService.js";
+
+let stripeClient = null;
+
+export function isStripeConfigured() {
+  return getStripeConfig().configured;
+}
+
+export function getStripe() {
+  if (!isStripeConfigured()) {
+    throw new Error("Stripe non configuré.");
+  }
+  if (!stripeClient) {
+    stripeClient = new Stripe(getStripeConfig().secretKey);
+  }
+  return stripeClient;
+}
+
+export function getPriceIdForPlan(planId) {
+  const { prices } = getStripeConfig();
+  return prices[planId] ?? null;
+}
+
+export function getPlanIdForPriceId(priceId) {
+  const { prices } = getStripeConfig();
+  return Object.entries(prices).find(([, id]) => id === priceId)?.[0] ?? null;
+}
+
+function planIdFromSubscription(stripeSubscription) {
+  const priceId = stripeSubscription.items?.data?.[0]?.price?.id;
+  return (
+    stripeSubscription.metadata?.planId ?? getPlanIdForPriceId(priceId) ?? null
+  );
+}
+
+function isActiveStripeStatus(status) {
+  return status === "active" || status === "trialing";
+}
+
+/**
+ * Résout les abonnements multiples : conserve le forfait le plus élevé,
+ * annule les doublons actifs côté Stripe, met à jour Firestore.
+ */
+export async function reconcileCustomerSubscriptions(uid, customerId) {
+  if (!customerId) return null;
+
+  const stripe = getStripe();
+  const [active, trialing, pastDue] = await Promise.all([
+    stripe.subscriptions.list({
+      customer: customerId,
+      status: "active",
+      limit: 100,
+    }),
+    stripe.subscriptions.list({
+      customer: customerId,
+      status: "trialing",
+      limit: 100,
+    }),
+    stripe.subscriptions.list({
+      customer: customerId,
+      status: "past_due",
+      limit: 100,
+    }),
+  ]);
+
+  const candidates = [...active.data, ...trialing.data, ...pastDue.data].filter(
+    (sub) => isActiveStripeStatus(sub.status) || sub.status === "past_due",
+  );
+
+  if (candidates.length === 0) {
+    await applyStripeSubscription(uid, {
+      planId: null,
+      status: "canceled",
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: null,
+      currentPeriodEnd: null,
+    });
+    return null;
+  }
+
+  const ranked = candidates
+    .map((sub) => ({
+      sub,
+      planId: planIdFromSubscription(sub),
+      rank: getPlanRank(planIdFromSubscription(sub)),
+    }))
+    .sort((a, b) => {
+      if (b.rank !== a.rank) return b.rank - a.rank;
+      return b.sub.created - a.sub.created;
+    });
+
+  const winner = ranked[0];
+
+  for (let i = 1; i < ranked.length; i++) {
+    try {
+      await stripe.subscriptions.cancel(ranked[i].sub.id);
+      console.info(
+        `Abonnement en double annulé : ${ranked[i].sub.id} (${ranked[i].planId})`,
+      );
+    } catch (err) {
+      console.warn(
+        `Impossible d'annuler l'abonnement ${ranked[i].sub.id}:`,
+        err.message,
+      );
+    }
+  }
+
+  const status =
+    winner.sub.status === "past_due"
+      ? "past_due"
+      : mapStripeStatus(winner.sub.status);
+
+  await applyStripeSubscription(uid, {
+    planId: status === "active" ? winner.planId : null,
+    status,
+    stripeCustomerId: customerId,
+    stripeSubscriptionId: winner.sub.id,
+    currentPeriodEnd: new Date(winner.sub.current_period_end * 1000),
+    resetUsage: false,
+  });
+
+  return winner;
+}
+
+export async function getOrCreateStripeCustomer(uid, email) {
+  const stripe = getStripe();
+  const { getUserData } = await import("./subscriptionService.js");
+  const { ref, data } = await getUserData(uid);
+
+  const existingId = data.subscription?.stripeCustomerId;
+  if (existingId) {
+    try {
+      await stripe.customers.retrieve(existingId);
+      return existingId;
+    } catch {
+      // Customer supprimé côté Stripe — on en recrée un
+    }
+  }
+
+  const customer = await stripe.customers.create({
+    email: email ?? undefined,
+    metadata: { firebaseUid: uid },
+  });
+
+  await ref.set(
+    {
+      subscription: {
+        ...(data.subscription ?? {}),
+        stripeCustomerId: customer.id,
+      },
+    },
+    { merge: true },
+  );
+
+  return customer.id;
+}
+
+export async function createCheckoutSession({
+  uid,
+  email,
+  planId,
+  embedded = false,
+}) {
+  if (!isValidPlanId(planId)) {
+    throw new Error("Forfait invalide.");
+  }
+
+  const priceId = getPriceIdForPlan(planId);
+  if (!priceId) {
+    throw new Error(`Prix Stripe manquant pour le forfait ${planId}.`);
+  }
+
+  const stripe = getStripe();
+  const { clientUrl } = getStripeConfig();
+  const { getUserData } = await import("./subscriptionService.js");
+  const customerId = await getOrCreateStripeCustomer(uid, email);
+
+  try {
+    await reconcileCustomerSubscriptions(uid, customerId);
+  } catch (err) {
+    console.warn("Réconciliation Stripe avant checkout:", err.message);
+  }
+
+  const { data: freshData } = await getUserData(uid);
+  const existingSubId = freshData.subscription?.stripeSubscriptionId;
+  if (existingSubId && freshData.subscription?.status === "active") {
+    try {
+      const existing = await stripe.subscriptions.retrieve(existingSubId);
+      if (isActiveStripeStatus(existing.status)) {
+        const currentPlanId = planIdFromSubscription(existing);
+        if (currentPlanId === planId) {
+          throw new Error("Vous êtes déjà abonné à ce forfait.");
+        }
+
+        const updated = await stripe.subscriptions.update(existingSubId, {
+          items: [
+            {
+              id: existing.items.data[0].id,
+              price: priceId,
+            },
+          ],
+          metadata: {
+            firebaseUid: uid,
+            planId,
+          },
+          proration_behavior: "create_prorations",
+        });
+
+        await reconcileCustomerSubscriptions(uid, customerId);
+        return { upgraded: true, planId, subscriptionId: updated.id };
+      }
+    } catch (err) {
+      if (err.message === "Vous êtes déjà abonné à ce forfait.") {
+        throw err;
+      }
+      console.warn(
+        "Mise à niveau directe impossible, nouvelle session checkout:",
+        err.message,
+      );
+    }
+  }
+
+  const sessionParams = {
+    mode: "subscription",
+    customer: customerId,
+    line_items: [{ price: priceId, quantity: 1 }],
+    metadata: {
+      firebaseUid: uid,
+      planId,
+    },
+    subscription_data: {
+      metadata: {
+        firebaseUid: uid,
+        planId,
+      },
+    },
+    allow_promotion_codes: true,
+  };
+
+  if (embedded) {
+    sessionParams.ui_mode = "embedded_page";
+    sessionParams.return_url = `${clientUrl}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
+  } else {
+    sessionParams.success_url = `${clientUrl}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
+    sessionParams.cancel_url = `${clientUrl}/pricing?checkout=canceled`;
+  }
+
+  const session = await stripe.checkout.sessions.create(sessionParams);
+
+  if (embedded) {
+    return {
+      clientSecret: session.client_secret,
+      sessionId: session.id,
+    };
+  }
+
+  return { url: session.url, sessionId: session.id };
+}
+
+export async function createBillingPortalSession(uid) {
+  const stripe = getStripe();
+  const { getUserData } = await import("./subscriptionService.js");
+  const { ref, data } = await getUserData(uid);
+  let customerId = data.subscription?.stripeCustomerId;
+
+  if (!customerId && data.subscription?.stripeSubscriptionId) {
+    const subscription = await stripe.subscriptions.retrieve(
+      data.subscription.stripeSubscriptionId,
+    );
+    customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer?.id;
+
+    if (customerId) {
+      await ref.set(
+        {
+          subscription: {
+            ...(data.subscription ?? {}),
+            stripeCustomerId: customerId,
+          },
+        },
+        { merge: true },
+      );
+    }
+  }
+
+  if (!customerId) {
+    throw new Error(
+      "Aucun compte de facturation Stripe. Réabonnez-vous via la page Tarifs.",
+    );
+  }
+
+  const { clientUrl } = getStripeConfig();
+  const session = await stripe.billingPortal.sessions.create({
+    customer: customerId,
+    return_url: `${clientUrl}/`,
+  });
+
+  return { url: session.url };
+}
+
+export function constructWebhookEvent(rawBody, signature) {
+  const { webhookSecret } = getStripeConfig();
+  if (!webhookSecret) {
+    throw new Error("STRIPE_WEBHOOK_SECRET manquant.");
+  }
+  return getStripe().webhooks.constructEvent(rawBody, signature, webhookSecret);
+}
+
+function mapStripeStatus(status) {
+  if (status === "active" || status === "trialing") return "active";
+  if (status === "past_due") return "past_due";
+  return "canceled";
+}
+
+export async function syncStripeSubscription(stripeSubscription) {
+  const uid =
+    stripeSubscription.metadata?.firebaseUid ??
+    (await resolveUidFromCustomer(stripeSubscription.customer));
+
+  if (!uid) {
+    console.warn(
+      "Webhook Stripe : uid Firebase introuvable",
+      stripeSubscription.id,
+    );
+    return;
+  }
+
+  const customerId =
+    typeof stripeSubscription.customer === "string"
+      ? stripeSubscription.customer
+      : stripeSubscription.customer?.id;
+
+  await reconcileCustomerSubscriptions(uid, customerId);
+}
+
+async function resolveUidFromCustomer(customerId) {
+  if (!customerId) return null;
+  const stripe = getStripe();
+  const customer = await stripe.customers.retrieve(
+    typeof customerId === "string" ? customerId : customerId.id,
+  );
+  if (customer.deleted) return null;
+  return customer.metadata?.firebaseUid ?? null;
+}
+
+export async function syncSubscriptionForUser(uid) {
+  const { getUserData } = await import("./subscriptionService.js");
+  const { data } = await getUserData(uid);
+  const customerId = data.subscription?.stripeCustomerId;
+  if (!customerId) {
+    throw new Error("Aucun compte Stripe associé.");
+  }
+  return reconcileCustomerSubscriptions(uid, customerId);
+}
+
+export async function handleCheckoutSessionCompleted(session) {
+  const uid = session.metadata?.firebaseUid;
+  if (!uid || !session.subscription) return;
+
+  const stripe = getStripe();
+  const subscription = await stripe.subscriptions.retrieve(
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription.id,
+  );
+
+  const customerId =
+    typeof subscription.customer === "string"
+      ? subscription.customer
+      : subscription.customer?.id;
+
+  await reconcileCustomerSubscriptions(uid, customerId);
+}
+
+export async function handleStripeWebhook(event) {
+  switch (event.type) {
+    case "checkout.session.completed":
+      await handleCheckoutSessionCompleted(event.data.object);
+      break;
+    case "customer.subscription.created":
+    case "customer.subscription.updated":
+      await syncStripeSubscription(event.data.object);
+      break;
+    case "customer.subscription.deleted":
+      await syncStripeSubscription({
+        ...event.data.object,
+        status: "canceled",
+      });
+      break;
+    default:
+      break;
+  }
+}
+
+export async function cancelStripeSubscription(uid) {
+  const stripe = getStripe();
+  const { getUserData } = await import("./subscriptionService.js");
+  const { data } = await getUserData(uid);
+  const subscriptionId = data.subscription?.stripeSubscriptionId;
+
+  if (!subscriptionId) {
+    throw new Error("Aucun abonnement actif à annuler.");
+  }
+
+  await stripe.subscriptions.update(subscriptionId, {
+    cancel_at_period_end: true,
+  });
+
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  await syncStripeSubscription(subscription);
+}
