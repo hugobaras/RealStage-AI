@@ -1005,10 +1005,6 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
       ? "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex-row"
       : "relative hidden min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex lg:flex-row";
 
-  const photoActionBottomOffset = historyExpanded
-    ? "bottom-28 max-lg:bottom-36"
-    : "bottom-4 max-lg:bottom-20";
-
   const controlPanelProps = {
     mode,
     style,
@@ -1159,7 +1155,6 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
                     onDownload={() => handleDownload()}
                     onExportPack={() => handleExportPack()}
                     onChainDeclutterToFurnish={handleChainDeclutterToFurnish}
-                    photoActionBottomOffset={photoActionBottomOffset}
                   />
                 </div>
 

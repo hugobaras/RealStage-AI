@@ -26,7 +26,6 @@ export default function ImageCanvas({
   onDownload,
   onExportPack,
   onChainDeclutterToFurnish,
-  photoActionBottomOffset = "bottom-4",
 }) {
   const theme = getModeTheme(mode);
   const inputRef = useRef(null);
@@ -59,7 +58,7 @@ export default function ImageCanvas({
   };
 
   return (
-    <section className="relative flex min-h-0 flex-1 flex-col p-2 lg:h-full lg:min-h-0 lg:p-5">
+    <section className="relative flex min-h-0 flex-1 flex-col gap-2 p-2 lg:h-full lg:min-h-0 lg:gap-3 lg:p-5">
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
@@ -148,19 +147,6 @@ export default function ImageCanvas({
           </button>
         )}
 
-        <PhotoActionBar
-          mode={mode}
-          hasResult={hasResult}
-          queueCount={queueCount}
-          loading={loading}
-          onUseAsBase={onUseAsBase}
-          onNextPhoto={onNextPhoto}
-          onDownload={onDownload}
-          onExportPack={onExportPack}
-          onChainDeclutterToFurnish={onChainDeclutterToFurnish}
-          bottomOffset={photoActionBottomOffset}
-        />
-
         {loading && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-black/70 backdrop-blur-sm">
             <div
@@ -182,6 +168,18 @@ export default function ImageCanvas({
           </div>
         )}
       </div>
+
+      <PhotoActionBar
+        mode={mode}
+        hasResult={hasResult}
+        queueCount={queueCount}
+        loading={loading}
+        onUseAsBase={onUseAsBase}
+        onNextPhoto={onNextPhoto}
+        onDownload={onDownload}
+        onExportPack={onExportPack}
+        onChainDeclutterToFurnish={onChainDeclutterToFurnish}
+      />
     </section>
   );
 }

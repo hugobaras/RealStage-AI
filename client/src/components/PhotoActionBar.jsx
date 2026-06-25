@@ -19,16 +19,13 @@ export default function PhotoActionBar({
   onDownload,
   onExportPack,
   onChainDeclutterToFurnish,
-  bottomOffset = "bottom-4",
 }) {
   const theme = getModeTheme(mode);
 
   if (!hasResult || loading) return null;
 
   return (
-    <div
-      className={`absolute left-4 right-4 z-10 flex flex-wrap items-center gap-2 rounded-2xl border border-zinc-700/60 bg-panel/90 p-2 shadow-2xl shadow-black/40 backdrop-blur-xl ${bottomOffset}`}
-    >
+    <div className="flex shrink-0 flex-wrap items-center gap-2 rounded-2xl border border-zinc-700/60 bg-panel/90 p-2 shadow-lg shadow-black/20 backdrop-blur-xl">
       <button
         type="button"
         onClick={onUseAsBase}
