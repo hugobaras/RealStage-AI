@@ -171,6 +171,26 @@ export async function listGenerations(uid, limit = 50, propertyId = null) {
   return entries;
 }
 
+export async function getGeneration(uid, id) {
+  if (!isFirebaseConfigured()) return null;
+  initFirebaseAdmin();
+
+  const ref = getFirestore()
+    .collection("users")
+    .doc(uid)
+    .collection("generations")
+    .doc(id);
+
+  const doc = await ref.get();
+  if (!doc.exists) {
+    const err = new Error("Génération introuvable.");
+    err.status = 404;
+    throw err;
+  }
+
+  return toGenerationEntry(id, doc.data());
+}
+
 export async function updateGenerationFavorite(uid, id, favorite) {
   if (!isFirebaseConfigured()) return null;
   initFirebaseAdmin();

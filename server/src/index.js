@@ -13,6 +13,7 @@ import subscriptionRouter from "./routes/subscription.js";
 import billingWebhookRouter from "./routes/billing.js";
 import propertiesRouter from "./routes/properties.js";
 import agencySettingsRouter from "./routes/agencySettings.js";
+import reportsRouter from "./routes/reports.js";
 import { initFirebaseAdmin } from "./services/firebaseAdmin.js";
 import { isStripeConfigured } from "./services/stripeService.js";
 import { formatFalError } from "./utils/falErrors.js";
@@ -62,6 +63,7 @@ app.use("/api", authRouter);
 app.use("/api", subscriptionRouter);
 app.use("/api", propertiesRouter);
 app.use("/api", agencySettingsRouter);
+app.use("/api", reportsRouter);
 app.use("/api", generationsRouter);
 app.use("/api", generateRouter);
 

@@ -9,12 +9,12 @@ function getRoomLabel(roomId) {
 
 function StatusIcon({ status }) {
   if (status === "done") {
-    return <Check className="h-3.5 w-3.5 text-emerald-400" />;
+    return <Check className="h-3.5 w-3.5 text-estate-stone-light" />;
   }
   if (status === "queued") {
     return <Clock className="h-3.5 w-3.5 text-amber-400" />;
   }
-  return <Circle className="h-3.5 w-3.5 text-zinc-600" />;
+  return <Circle className="h-3.5 w-3.5 text-fg-subtle" />;
 }
 
 export default function RoomChecklist({
@@ -28,9 +28,9 @@ export default function RoomChecklist({
   const theme = getModeTheme(mode);
 
   return (
-    <div className="shrink-0 border-b border-zinc-800/80 bg-panel/40 px-4 py-3">
+    <div className="shrink-0 border-b border-line/80 bg-panel/40 px-4 py-3">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+        <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           Checklist annonce
         </span>
         <span
@@ -52,8 +52,8 @@ export default function RoomChecklist({
                 active
                   ? `${theme.bg} text-white`
                   : status === "done"
-                    ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30"
-                    : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    ? "bg-estate-stone/15 text-estate-stone-light ring-1 ring-estate-stone/30"
+                    : "bg-elevated/80 text-fg-muted hover:bg-elevated hover:text-fg"
               }`}
             >
               <StatusIcon status={status} />

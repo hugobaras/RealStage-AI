@@ -30,24 +30,24 @@ function CollapsibleSection({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-800/80 bg-surface/40">
+    <div className="overflow-hidden rounded-xl border border-line/80 bg-surface/40">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition hover:bg-zinc-800/40"
+        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition hover:bg-elevated/40"
       >
         <div className="min-w-0">
-          <p className="text-sm font-medium text-white">{title}</p>
+          <p className="text-sm font-medium text-fg">{title}</p>
           {hint && !open && (
             <p className="mt-0.5 truncate text-[11px] text-muted">{hint}</p>
           )}
         </div>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-zinc-500 transition ${open ? "rotate-180" : ""} ${theme.text}`}
+          className={`h-4 w-4 shrink-0 text-fg-muted transition ${open ? "rotate-180" : ""} ${theme.text}`}
         />
       </button>
       {open && (
-        <div className="space-y-3 border-t border-zinc-800/80 px-3 py-3">
+        <div className="space-y-3 border-t border-line/80 px-3 py-3">
           {children}
         </div>
       )}
@@ -80,7 +80,7 @@ function ImageThumbnail({
 
   if (imageUrl) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-800/80 bg-surface/40 px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line/80 bg-surface/40 px-3 py-2">
         <input
           ref={inputRef}
           type="file"
@@ -97,7 +97,7 @@ function ImageThumbnail({
           type="button"
           onClick={() => !disabled && inputRef.current?.click()}
           disabled={disabled}
-          className={`text-xs font-medium ${theme.text} transition hover:text-white disabled:opacity-40`}
+          className={`text-xs font-medium ${theme.text} transition hover:text-fg disabled:opacity-40`}
         >
           Changer la photo
         </button>
@@ -129,7 +129,7 @@ function ImageThumbnail({
         tabIndex={0}
         onClick={() => !disabled && inputRef.current?.click()}
         onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
-        className={`flex h-14 w-14 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-zinc-700/80 bg-deep ring-1 ring-white/5 transition ${theme.hoverBorder}`}
+        className={`flex h-14 w-14 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-line/80 bg-deep ring-1 ring-white/5 transition ${theme.hoverBorder}`}
       >
         <input
           ref={inputRef}
@@ -143,11 +143,11 @@ function ImageThumbnail({
             e.target.value = "";
           }}
         />
-        <Upload className="h-5 w-5 text-zinc-500" />
+        <Upload className="h-5 w-5 text-fg-muted" />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-white">Aucune photo</p>
+        <p className="text-xs font-medium text-fg">Aucune photo</p>
         <p className="text-[11px] text-muted">Import unique ou multiple</p>
       </div>
     </div>
@@ -162,7 +162,7 @@ function RoomSqmField({ value, roomType, onChange, disabled, theme }) {
       <div className="mb-2 flex items-center justify-between gap-2">
         <label className="section-label">
           Surface de la pièce{" "}
-          <span className="font-normal normal-case text-zinc-600">
+          <span className="font-normal normal-case text-fg-subtle">
             (optionnel)
           </span>
         </label>
@@ -170,7 +170,7 @@ function RoomSqmField({ value, roomType, onChange, disabled, theme }) {
           type="button"
           disabled={disabled}
           onClick={() => onChange(typical)}
-          className={`text-[11px] ${theme.text} transition hover:text-white disabled:opacity-40`}
+          className={`text-[11px] ${theme.text} transition hover:text-fg disabled:opacity-40`}
         >
           Type : {typical} m²
         </button>
@@ -207,7 +207,7 @@ function RoomSqmField({ value, roomType, onChange, disabled, theme }) {
             className={`rounded-lg px-2 py-1 text-[11px] font-medium transition ${
               value === preset
                 ? `${theme.bg} text-white`
-                : "bg-zinc-800 text-zinc-400 hover:text-white"
+                : "bg-elevated text-fg-muted hover:text-fg"
             } disabled:opacity-40`}
           >
             {preset}
@@ -247,7 +247,7 @@ function StyleSelect({ value, onChange, disabled }) {
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted" />
       </div>
     </div>
   );
@@ -266,7 +266,7 @@ function AdjustmentSlider({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <label className="flex items-center gap-2 text-sm text-zinc-300">
+        <label className="flex items-center gap-2 text-sm text-fg-subtle">
           <Icon className={`h-3.5 w-3.5 ${theme.icon}`} strokeWidth={2} />
           {label}
         </label>
@@ -282,9 +282,9 @@ function AdjustmentSlider({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(Number(e.target.value))}
-        className={`h-1.5 w-full cursor-pointer appearance-none rounded-full bg-zinc-700 ${theme.slider} disabled:cursor-not-allowed disabled:opacity-40`}
+        className={`h-1.5 w-full cursor-pointer appearance-none rounded-full bg-elevated ${theme.slider} disabled:cursor-not-allowed disabled:opacity-40`}
       />
-      <div className="mt-1 flex justify-between text-[10px] text-zinc-500">
+      <div className="mt-1 flex justify-between text-[10px] text-fg-muted">
         <span>{minLabel}</span>
         <span>{maxLabel}</span>
       </div>
@@ -361,12 +361,12 @@ export default function ControlPanel({
   const adjustmentsBlock = (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-medium text-white">Ajustements photo</h3>
+        <h3 className="text-sm font-medium text-fg">Ajustements photo</h3>
         {hasAdjustments && (
           <button
             type="button"
             onClick={onResetAdjustments}
-            className="flex items-center gap-1 text-[11px] text-zinc-400 transition-colors hover:text-white"
+            className="flex items-center gap-1 text-[11px] text-fg-muted transition-colors hover:text-fg"
           >
             <RotateCcw className="h-3 w-3" />
             Réinitialiser
@@ -421,12 +421,14 @@ export default function ControlPanel({
     <aside className="flex h-full flex-col overflow-y-auto bg-panel/95 backdrop-blur-sm scrollbar-thin lg:bg-panel/90">
       <div className="flex flex-1 flex-col gap-3.5 p-3.5 lg:p-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-base font-semibold text-white">Paramètres</h2>
+          <h2 className="font-display text-base font-semibold text-fg">
+            Paramètres
+          </h2>
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-800/60 hover:text-white lg:flex"
+              className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg text-fg-muted transition hover:bg-elevated/60 hover:text-fg lg:flex"
               title="Masquer les paramètres"
               aria-label="Masquer les paramètres"
             >
@@ -497,18 +499,18 @@ export default function ControlPanel({
           )}
           <div
             className={
-              isDeclutter ? "" : "space-y-4 border-t border-zinc-800/80 pt-3"
+              isDeclutter ? "" : "space-y-4 border-t border-line/80 pt-3"
             }
           >
             {adjustmentsBlock}
           </div>
         </CollapsibleSection>
 
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800/80 px-3 py-2.5">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-line/80 px-3 py-2.5">
           <div className="flex min-w-0 items-center gap-2">
             <Zap className={`h-4 w-4 shrink-0 ${theme.icon}`} />
             <div className="min-w-0">
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-fg">
                 Réflexion approfondie
               </p>
               <p className="text-[11px] text-muted">{deepThinkingHint}</p>
@@ -525,7 +527,7 @@ export default function ControlPanel({
               disabled={deepThinkingDisabled}
             />
             <div
-              className={`h-5 w-9 rounded-full bg-zinc-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all ${theme.peerChecked} peer-focus:outline-none`}
+              className={`h-5 w-9 rounded-full bg-elevated after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all ${theme.peerChecked} peer-focus:outline-none`}
             />
           </label>
         </div>
@@ -586,7 +588,7 @@ export default function ControlPanel({
           {loading ? "Génération en cours…" : generateLabel}
         </button>
         {!baseImage && (
-          <p className="mt-2 text-center text-[11px] text-zinc-500">
+          <p className="mt-2 text-center text-[11px] text-fg-muted">
             Importez une photo pour activer la génération
           </p>
         )}

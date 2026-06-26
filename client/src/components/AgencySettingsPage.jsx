@@ -16,16 +16,25 @@ const WATERMARK_POSITIONS = [
   { id: "center", label: "Centre" },
 ];
 
-function TypographyControls({ prefix, label, current, onChange, sizeMin, sizeMax }) {
+function TypographyControls({
+  prefix,
+  label,
+  current,
+  onChange,
+  sizeMin,
+  sizeMax,
+}) {
   const sizeKey = `${prefix}FontSize`;
   const boldKey = `${prefix}Bold`;
   const size = current[sizeKey] ?? DEFAULT_AGENCY_TYPOGRAPHY[sizeKey];
   const bold = current[boldKey] ?? DEFAULT_AGENCY_TYPOGRAPHY[boldKey];
 
   return (
-    <div className="mt-2 flex flex-wrap items-end gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2">
+    <div className="mt-2 flex flex-wrap items-end gap-4 rounded-xl border border-line bg-elevated/50 px-3 py-2">
       <label className="min-w-[7rem] flex-1">
-        <span className="mb-1 block text-xs text-zinc-500">{label} — taille</span>
+        <span className="mb-1 block text-xs text-fg-muted">
+          {label} — taille
+        </span>
         <div className="flex items-center gap-2">
           <input
             type="range"
@@ -35,17 +44,17 @@ function TypographyControls({ prefix, label, current, onChange, sizeMin, sizeMax
             onChange={(e) => onChange(sizeKey, Number(e.target.value))}
             className="flex-1"
           />
-          <span className="w-8 text-right text-xs tabular-nums text-zinc-400">
+          <span className="w-8 text-right text-xs tabular-nums text-fg-muted">
             {size}
           </span>
         </div>
       </label>
-      <label className="flex cursor-pointer items-center gap-2 pb-1 text-sm text-zinc-300">
+      <label className="flex cursor-pointer items-center gap-2 pb-1 text-sm text-fg-subtle">
         <input
           type="checkbox"
           checked={bold}
           onChange={(e) => onChange(boldKey, e.target.checked)}
-          className="rounded border-zinc-600"
+          className="rounded border-line"
         />
         Gras
       </label>
@@ -80,8 +89,10 @@ export default function AgencySettingsPage() {
       <AppShell>
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto bg-deep p-6 text-center">
           <MobileAppNav />
-          <h1 className="text-xl font-bold text-white">Paramètres agence</h1>
-          <p className="mt-2 max-w-md text-sm text-zinc-400">
+          <h1 className="font-display text-xl font-semibold text-fg">
+            Paramètres agence
+          </h1>
+          <p className="mt-2 max-w-md text-sm text-fg-muted">
             Style par défaut, logo, signature et mentions légales — réservé au
             forfait Agence.
           </p>
@@ -178,9 +189,11 @@ export default function AgencySettingsPage() {
     <AppShell>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-deep">
         <MobileAppNav />
-        <header className="border-b border-zinc-800 bg-panel px-4 py-4 lg:px-8">
-          <h1 className="text-2xl font-bold text-white">Paramètres agence</h1>
-          <p className="mt-1 text-sm text-zinc-400">
+        <header className="border-b border-line bg-panel px-4 py-4 lg:px-8">
+          <h1 className="font-display text-2xl font-semibold text-fg">
+            Paramètres agence
+          </h1>
+          <p className="mt-1 text-sm text-fg-muted">
             Configurez une fois — toutes vos exports suivront votre identité.
           </p>
         </header>
@@ -188,13 +201,13 @@ export default function AgencySettingsPage() {
         <div className="mx-auto grid max-w-5xl gap-8 p-4 lg:grid-cols-2 lg:p-8">
           <div className="space-y-5">
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-zinc-300">
+              <span className="mb-1 block text-sm font-medium text-fg-subtle">
                 Style par défaut
               </span>
               <select
                 value={current.defaultStyle ?? "scandinave"}
                 onChange={(e) => handleChange("defaultStyle", e.target.value)}
-                className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                className="input-field"
               >
                 {STYLES.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -205,7 +218,7 @@ export default function AgencySettingsPage() {
             </label>
 
             <div>
-              <span className="mb-2 block text-sm font-medium text-zinc-300">
+              <span className="mb-2 block text-sm font-medium text-fg-subtle">
                 Logo agence
               </span>
               <div className="flex items-center gap-3">
@@ -213,11 +226,11 @@ export default function AgencySettingsPage() {
                   <img
                     src={current.logoUrl}
                     alt="Logo"
-                    className="h-12 w-12 rounded-lg border border-zinc-700 object-contain bg-transparent p-1"
+                    className="h-12 w-12 rounded-lg border border-line object-contain bg-transparent p-1"
                   />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-zinc-700">
-                    <ImageIcon className="h-5 w-5 text-zinc-600" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-line">
+                    <ImageIcon className="h-5 w-5 text-fg-subtle" />
                   </div>
                 )}
                 <button
@@ -240,14 +253,14 @@ export default function AgencySettingsPage() {
                 <p className="mt-2 text-xs text-red-400">{logoError}</p>
               )}
               {logoSuccess && !logoError && (
-                <p className="mt-2 text-xs text-emerald-400">
+                <p className="mt-2 text-xs text-estate-stone-light">
                   Logo enregistré.
                 </p>
               )}
             </div>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-zinc-300">
+              <span className="mb-1 block text-sm font-medium text-fg-subtle">
                 Opacité logo ({Math.round((current.logoOpacity ?? 0.15) * 100)}
                 %)
               </span>
@@ -265,7 +278,7 @@ export default function AgencySettingsPage() {
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-zinc-300">
+              <span className="mb-1 block text-sm font-medium text-fg-subtle">
                 Position du filigrane
               </span>
               <select
@@ -273,7 +286,7 @@ export default function AgencySettingsPage() {
                 onChange={(e) =>
                   handleChange("watermarkPosition", e.target.value)
                 }
-                className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                className="input-field"
               >
                 {WATERMARK_POSITIONS.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -284,7 +297,7 @@ export default function AgencySettingsPage() {
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-zinc-300">
+              <span className="mb-1 block text-sm font-medium text-fg-subtle">
                 Signature photo
               </span>
               <input
@@ -292,7 +305,7 @@ export default function AgencySettingsPage() {
                 value={current.photoSignature ?? ""}
                 onChange={(e) => handleChange("photoSignature", e.target.value)}
                 placeholder="Agence Dupont — 01 23 45 67 89"
-                className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                className="input-field"
               />
               <TypographyControls
                 prefix="signature"
@@ -305,7 +318,7 @@ export default function AgencySettingsPage() {
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-zinc-300">
+              <span className="mb-1 block text-sm font-medium text-fg-subtle">
                 Mentions légales
               </span>
               <textarea
@@ -313,7 +326,7 @@ export default function AgencySettingsPage() {
                 onChange={(e) => handleChange("legalMentions", e.target.value)}
                 placeholder="Photos virtuellement meublées — non contractuel"
                 rows={3}
-                className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                className="input-field"
               />
               <TypographyControls
                 prefix="legal"
@@ -345,7 +358,7 @@ export default function AgencySettingsPage() {
           </div>
 
           <div className="surface-card rounded-2xl p-4">
-            <h2 className="mb-3 text-sm font-semibold text-zinc-300">
+            <h2 className="mb-3 text-sm font-semibold text-fg-subtle">
               Aperçu export
             </h2>
             {previewUrl ? (
@@ -355,7 +368,7 @@ export default function AgencySettingsPage() {
                 className="w-full rounded-lg"
               />
             ) : (
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-fg-muted">
                 Cliquez sur « Aperçu export » pour visualiser le rendu avec
                 votre branding.
               </p>

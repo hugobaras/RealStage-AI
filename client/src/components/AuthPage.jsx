@@ -56,19 +56,19 @@ export default function AuthPage() {
 
   if (!firebaseConfigured) {
     return (
-      <div className="page-bg flex min-h-screen items-center justify-center px-4">
+      <div className="app-themed page-bg flex min-h-screen items-center justify-center px-4">
         <div className="glass-panel w-full max-w-md rounded-2xl p-8 text-center">
           <img
             src="/realstage-logo.png"
             alt="RealStage AI"
             className="mx-auto mb-6 h-14 w-14 object-contain"
           />
-          <h1 className="text-xl font-semibold text-white">
+          <h1 className="font-display text-xl font-semibold text-fg">
             Configuration requise
           </h1>
-          <p className="mt-3 text-sm text-muted">
-            Copiez <code className="text-zinc-300">client/.env.example</code>{" "}
-            vers <code className="text-zinc-300">client/.env</code> et
+          <p className="mt-3 text-sm text-fg-muted">
+            Copiez <code className="text-fg-subtle">client/.env.example</code>{" "}
+            vers <code className="text-fg-subtle">client/.env</code> et
             renseignez vos clés Firebase.
           </p>
         </div>
@@ -77,9 +77,8 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="page-bg flex min-h-screen">
-      {/* Panneau visuel — desktop */}
-      <aside className="relative hidden w-[45%] overflow-hidden border-r border-zinc-800/80 lg:flex lg:flex-col lg:justify-between">
+    <div className="app-themed page-bg flex min-h-screen">
+      <aside className="relative hidden w-[45%] overflow-hidden border-r border-line/80 lg:flex lg:flex-col lg:justify-between">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-20 top-0 h-96 w-96 rounded-full bg-accent/20 blur-[100px]" />
           <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-accent-light/10 blur-[80px]" />
@@ -89,7 +88,7 @@ export default function AuthPage() {
         <div className="relative p-10">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
+            className="inline-flex items-center gap-2 text-sm text-fg-muted transition hover:text-fg"
           >
             <ArrowLeft className="h-4 w-4" />
             Retour à l&apos;accueil
@@ -102,17 +101,17 @@ export default function AuthPage() {
                 alt="RealStage AI"
                 className="h-11 w-11 object-contain"
               />
-              <span className="text-xl font-semibold tracking-tight">
+              <span className="font-display text-xl font-semibold tracking-tight text-fg">
                 RealStage AI
               </span>
             </div>
 
-            <h2 className="text-3xl font-bold leading-tight tracking-tight">
+            <h2 className="font-display text-3xl font-semibold leading-tight tracking-tight text-fg">
               Vos biens méritent
               <br />
               <span className="text-gradient-animated">des visuels pro</span>
             </h2>
-            <p className="mt-4 max-w-sm text-base leading-relaxed text-zinc-400">
+            <p className="mt-4 max-w-sm text-base leading-relaxed text-fg-muted">
               Home staging virtuel en quelques secondes. Conçu pour les agents
               immobiliers qui enchaînent les photos au quotidien.
             </p>
@@ -121,10 +120,10 @@ export default function AuthPage() {
               {BENEFITS.map((item) => (
                 <li
                   key={item}
-                  className="flex items-center gap-2.5 text-sm text-zinc-300"
+                  className="flex items-center gap-2.5 text-sm text-fg-subtle"
                 >
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/20">
-                    <Check className="h-3 w-3 text-accent-light" />
+                    <Check className="h-3 w-3 text-accent" />
                   </span>
                   {item}
                 </li>
@@ -133,23 +132,22 @@ export default function AuthPage() {
           </div>
         </div>
 
-        <div className="relative border-t border-zinc-800/60 p-10">
-          <div className="flex items-center gap-2 text-sm text-zinc-400">
-            <Sparkles className="h-4 w-4 text-accent-light" />
+        <div className="relative border-t border-line/60 p-10">
+          <div className="flex items-center gap-2 text-sm text-fg-muted">
+            <Sparkles className="h-4 w-4 text-accent" />
             <span>
-              <strong className="text-white">{TRIAL_LIMIT} générations</strong>{" "}
+              <strong className="text-fg">{TRIAL_LIMIT} générations</strong>{" "}
               offertes à l&apos;inscription
             </span>
           </div>
         </div>
       </aside>
 
-      {/* Formulaire */}
       <div className="flex flex-1 flex-col">
         <header className="p-6 lg:hidden">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
+            className="inline-flex items-center gap-2 text-sm text-fg-muted transition hover:text-fg"
           >
             <ArrowLeft className="h-4 w-4" />
             Retour
@@ -165,7 +163,9 @@ export default function AuthPage() {
                   alt="RealStage AI"
                   className="h-10 w-10 object-contain"
                 />
-                <span className="text-lg font-semibold">RealStage AI</span>
+                <span className="font-display text-lg font-semibold text-fg">
+                  RealStage AI
+                </span>
               </div>
 
               <div className="surface-card mb-6 flex p-1">
@@ -178,7 +178,7 @@ export default function AuthPage() {
                   className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
                     !isSignup
                       ? "mode-pill-active"
-                      : "text-zinc-400 hover:text-white"
+                      : "text-fg-muted hover:text-fg"
                   }`}
                 >
                   Connexion
@@ -192,17 +192,17 @@ export default function AuthPage() {
                   className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
                     isSignup
                       ? "mode-pill-active"
-                      : "text-zinc-400 hover:text-white"
+                      : "text-fg-muted hover:text-fg"
                   }`}
                 >
                   Inscription
                 </button>
               </div>
 
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="font-display text-2xl font-semibold text-fg">
                 {isSignup ? "Créer un compte" : "Bon retour"}
               </h1>
-              <p className="mt-2 text-sm text-muted">
+              <p className="mt-2 text-sm text-fg-muted">
                 {isSignup
                   ? `${TRIAL_LIMIT} essais gratuits, sans carte bancaire.`
                   : "Connectez-vous pour accéder à votre studio."}
@@ -264,7 +264,7 @@ export default function AuthPage() {
               </div>
 
               {error && (
-                <p className="rounded-xl border border-red-900/50 bg-red-950/40 px-4 py-3 text-sm text-red-300">
+                <p className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
                   {error}
                 </p>
               )}
@@ -283,9 +283,9 @@ export default function AuthPage() {
             </form>
 
             <div className="my-6 flex items-center gap-3">
-              <div className="h-px flex-1 bg-zinc-800" />
-              <span className="text-xs text-muted">ou</span>
-              <div className="h-px flex-1 bg-zinc-800" />
+              <div className="h-px flex-1 bg-line" />
+              <span className="text-xs text-fg-muted">ou</span>
+              <div className="h-px flex-1 bg-line" />
             </div>
 
             <button

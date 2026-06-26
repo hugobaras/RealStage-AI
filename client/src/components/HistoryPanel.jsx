@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ChevronDown, Download, RefreshCw, Star } from "lucide-react";
+import { ChevronDown, Download, Flag, RefreshCw, Star } from "lucide-react";
 import { MODES } from "../constants/modes";
 import { STYLES } from "../constants/styles";
 import { ROOM_TYPES } from "../constants/roomTypes";
@@ -47,13 +47,16 @@ function HistoryCard({
   onDownload,
   onToggleFavorite,
   onExportPack,
+  onReport,
 }) {
+  const itemTheme = getModeTheme(item.mode);
+
   return (
     <div
       className={`group relative w-[112px] shrink-0 overflow-hidden rounded-xl border transition-all ${
         isSelected
           ? theme.selected
-          : "border-zinc-800/80 hover:border-zinc-600 hover:shadow-md"
+          : "border-line/80 hover:border-line hover:shadow-md"
       }`}
     >
       <button
@@ -61,14 +64,16 @@ function HistoryCard({
         onClick={() => onSelect(item)}
         className="block w-full text-left"
       >
-        <div className="relative h-[68px] overflow-hidden bg-zinc-900/60">
+        <div className="relative h-[68px] overflow-hidden bg-panel/60">
           <img
             src={item.imageUrl}
             alt={`Génération ${item.mode ?? "IA"}`}
             className="h-full w-full object-cover"
           />
           {item.mode && (
-            <span className="absolute left-1 top-1 rounded bg-black/75 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+            <span
+              className={`absolute left-1 top-1 rounded px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white shadow-sm ${itemTheme.bg}`}
+            >
               {getModeLabel(item.mode)}
             </span>
           )}
@@ -77,7 +82,7 @@ function HistoryCard({
           )}
         </div>
         <div className="space-y-0.5 bg-surface/40 px-2 py-1.5">
-          <p className="truncate text-[10px] font-medium text-zinc-200">
+          <p className="truncate text-[10px] font-medium text-fg">
             {item.roomType ? getRoomLabel(item.roomType) : "Pièce"}
             {item.style ? ` · ${getStyleLabel(item.style)}` : ""}
           </p>
@@ -95,13 +100,9 @@ function HistoryCard({
             onToggleFavorite(item);
           }}
           className={`flex h-5 w-5 items-center justify-center rounded bg-black/70 transition-colors ${
-            item.favorite
-              ? "text-amber-400"
-              : `text-white ${theme.hoverAction}`
+            item.favorite ? "text-amber-400" : `text-white ${theme.hoverAction}`
           }`}
-          title={
-            item.favorite ? "Retirer des favoris" : "Ajouter aux favoris"
-          }
+          title={item.favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
         >
           <Star
             className={`h-2.5 w-2.5 ${item.favorite ? "fill-current" : ""}`}
@@ -142,6 +143,19 @@ function HistoryCard({
         >
           <Download className="h-2.5 w-2.5" />
         </button>
+        {onReport && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onReport(item);
+            }}
+            className={`flex h-5 w-5 items-center justify-center rounded bg-black/70 text-white transition-colors ${theme.hoverAction}`}
+            title="Signaler"
+          >
+            <Flag className="h-2.5 w-2.5" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -158,6 +172,7 @@ export default function HistoryPanel({
   onDownload,
   onToggleFavorite,
   onExportPack,
+  onReport,
   expanded = true,
   onExpandedChange,
 }) {
@@ -184,7 +199,7 @@ export default function HistoryPanel({
         <button
           type="button"
           onClick={toggleExpanded}
-          className="flex items-center gap-2 text-xs font-medium text-zinc-300 transition hover:text-white"
+          className="flex items-center gap-2 text-xs font-medium text-fg-subtle transition hover:text-fg"
         >
           <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
           Historique
@@ -199,7 +214,7 @@ export default function HistoryPanel({
               onExpandedChange?.(true);
               setFavoritesOnly(true);
             }}
-            className="flex items-center gap-1 text-[10px] text-muted transition hover:text-zinc-300"
+            className="flex items-center gap-1 text-[10px] text-muted transition hover:text-fg-subtle"
           >
             <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
             {favoriteCount}
@@ -217,8 +232,8 @@ export default function HistoryPanel({
           onClick={toggleExpanded}
           className="flex min-w-0 items-center gap-1.5 text-left"
         >
-          <ChevronDown className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
-          <h2 className="truncate text-sm font-semibold text-white">
+          <ChevronDown className="h-3.5 w-3.5 shrink-0 text-fg-muted" />
+          <h2 className="truncate text-sm font-semibold text-fg">
             {propertyLabel ? `Historique — ${propertyLabel}` : "Historique"}
           </h2>
         </button>
@@ -233,7 +248,7 @@ export default function HistoryPanel({
               className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition ${
                 favoritesOnly
                   ? `${theme.bg} text-white`
-                  : "text-muted hover:text-zinc-300"
+                  : "text-muted hover:text-fg-subtle"
               }`}
               title="Afficher uniquement les favoris"
             >
@@ -251,7 +266,7 @@ export default function HistoryPanel({
           Array.from({ length: PLACEHOLDER_COUNT }).map((_, i) => (
             <div
               key={`loading-${i}`}
-              className="h-[96px] w-[112px] shrink-0 animate-pulse rounded-xl bg-zinc-800/60"
+              className="h-[96px] w-[112px] shrink-0 animate-pulse rounded-xl bg-elevated/60"
             />
           ))}
 
@@ -282,6 +297,7 @@ export default function HistoryPanel({
               onDownload={onDownload}
               onToggleFavorite={onToggleFavorite}
               onExportPack={onExportPack}
+              onReport={onReport}
             />
           ))}
       </div>

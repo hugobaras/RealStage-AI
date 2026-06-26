@@ -27,7 +27,7 @@ function SettingsSection({ icon: Icon, title, description, children }) {
         <div>
           <h2 className="text-base font-semibold text-fg">{title}</h2>
           {description && (
-            <p className="mt-0.5 text-sm text-zinc-500">{description}</p>
+            <p className="mt-0.5 text-sm text-fg-muted">{description}</p>
           )}
         </div>
       </div>
@@ -188,19 +188,21 @@ export default function UserSettingsPage() {
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-deep app-themed">
         <MobileAppNav />
         <header className="border-b border-line bg-panel px-4 py-4 lg:px-8">
-          <h1 className="text-2xl font-bold text-white">Mon compte</h1>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h1 className="font-display text-2xl font-semibold text-fg">
+            Mon compte
+          </h1>
+          <p className="mt-1 text-sm text-fg-muted">
             Profil, sécurité et abonnement.
           </p>
         </header>
 
         <div className="mx-auto w-full max-w-2xl space-y-5 p-4 lg:p-8">
-          <div className="flex items-center gap-4 rounded-2xl border border-zinc-800 bg-panel/80 px-5 py-4">
+          <div className="flex items-center gap-4 rounded-2xl border border-line bg-panel/80 px-5 py-4">
             {user?.photoURL ? (
               <img
                 src={user.photoURL}
                 alt=""
-                className="h-14 w-14 rounded-full border border-zinc-700 object-cover"
+                className="h-14 w-14 rounded-full border border-line object-cover"
               />
             ) : (
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/20 text-xl font-bold text-accent-light ring-1 ring-accent/30">
@@ -208,13 +210,13 @@ export default function UserSettingsPage() {
               </div>
             )}
             <div className="min-w-0">
-              <p className="truncate text-lg font-semibold text-white">
+              <p className="truncate text-lg font-semibold text-fg">
                 {user?.displayName ||
                   user?.email?.split("@")[0] ||
                   "Utilisateur"}
               </p>
-              <p className="truncate text-sm text-zinc-500">{user?.email}</p>
-              <p className="mt-1 text-xs text-zinc-600">
+              <p className="truncate text-sm text-fg-muted">{user?.email}</p>
+              <p className="mt-1 text-xs text-fg-subtle">
                 Connexion via {providerLabel(user)}
               </p>
             </div>
@@ -227,7 +229,7 @@ export default function UserSettingsPage() {
           >
             <form onSubmit={handleProfileSave} className="space-y-3">
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-zinc-400">
+                <span className="mb-1 block text-xs font-medium text-fg-muted">
                   Nom d&apos;affichage
                 </span>
                 <input
@@ -235,25 +237,27 @@ export default function UserSettingsPage() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Jean Dupont"
-                  className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                  className="input-field"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-zinc-400">
+                <span className="mb-1 block text-xs font-medium text-fg-muted">
                   Adresse e-mail
                 </span>
                 <input
                   type="email"
                   value={user?.email ?? ""}
                   readOnly
-                  className="w-full cursor-not-allowed rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-500"
+                  className="input-field cursor-not-allowed opacity-70"
                 />
               </label>
               {profileError && (
                 <p className="text-sm text-red-400">{profileError}</p>
               )}
               {profileMessage && (
-                <p className="text-sm text-emerald-400">{profileMessage}</p>
+                <p className="text-sm text-estate-stone-light">
+                  {profileMessage}
+                </p>
               )}
               <button
                 type="submit"
@@ -273,7 +277,7 @@ export default function UserSettingsPage() {
             >
               <form onSubmit={handlePasswordSave} className="space-y-3">
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-zinc-400">
+                  <span className="mb-1 block text-xs font-medium text-fg-muted">
                     Mot de passe actuel
                   </span>
                   <input
@@ -282,11 +286,11 @@ export default function UserSettingsPage() {
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     autoComplete="current-password"
                     required
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                    className="input-field"
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-zinc-400">
+                  <span className="mb-1 block text-xs font-medium text-fg-muted">
                     Nouveau mot de passe
                   </span>
                   <input
@@ -296,11 +300,11 @@ export default function UserSettingsPage() {
                     autoComplete="new-password"
                     required
                     minLength={6}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                    className="input-field"
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-zinc-400">
+                  <span className="mb-1 block text-xs font-medium text-fg-muted">
                     Confirmer le mot de passe
                   </span>
                   <input
@@ -310,14 +314,16 @@ export default function UserSettingsPage() {
                     autoComplete="new-password"
                     required
                     minLength={6}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white"
+                    className="input-field"
                   />
                 </label>
                 {passwordError && (
                   <p className="text-sm text-red-400">{passwordError}</p>
                 )}
                 {passwordMessage && (
-                  <p className="text-sm text-emerald-400">{passwordMessage}</p>
+                  <p className="text-sm text-estate-stone-light">
+                    {passwordMessage}
+                  </p>
                 )}
                 <button
                   type="submit"
@@ -348,22 +354,22 @@ export default function UserSettingsPage() {
               onClick={handleListingModeToggle}
               className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition ${
                 listingMode
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                  : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-600"
+                  ? "border-accent/40 bg-accent/10 text-accent-light"
+                  : "border-line bg-elevated text-fg-subtle hover:border-line"
               }`}
             >
               <span className="font-medium">Mode avant annonce</span>
               <span
                 className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                   listingMode
-                    ? "bg-emerald-500/20 text-emerald-300"
-                    : "bg-zinc-800 text-zinc-500"
+                    ? "bg-accent/20 text-accent-light"
+                    : "bg-elevated text-fg-muted"
                 }`}
               >
                 {listingMode ? "Activé" : "Désactivé"}
               </span>
             </button>
-            <p className="mt-2 text-xs text-zinc-500">
+            <p className="mt-2 text-xs text-fg-muted">
               Checklist des pièces essentielles et workflow guidé pour préparer
               une annonce immobilière.
             </p>
@@ -381,7 +387,7 @@ export default function UserSettingsPage() {
                     isSubscribed
                       ? "border-accent/40 bg-accent/15 text-accent-light"
                       : trialRemaining > 0
-                        ? "border-zinc-700 bg-zinc-800 text-zinc-300"
+                        ? "border-line bg-elevated text-fg-subtle"
                         : "border-red-900/40 bg-red-950/40 text-red-300"
                   }`}
                 >
@@ -392,18 +398,18 @@ export default function UserSettingsPage() {
                     type="button"
                     onClick={handleBillingPortal}
                     disabled={portalLoading}
-                    className="rounded-lg border border-zinc-700 px-3 py-1 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white disabled:opacity-50"
+                    className="rounded-lg border border-line px-3 py-1 text-sm text-fg-subtle transition hover:border-line hover:text-fg disabled:opacity-50"
                   >
                     {portalLoading ? "…" : "Gérer"}
                   </button>
                 )}
               </div>
 
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+              <div className="rounded-xl border border-line bg-elevated/50 px-4 py-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                   Forfait
                 </p>
-                <p className="mt-1 text-lg font-semibold text-white">
+                <p className="mt-1 text-lg font-semibold text-fg">
                   {subLoading
                     ? "Chargement…"
                     : isSubscribed && plan
@@ -411,17 +417,17 @@ export default function UserSettingsPage() {
                       : "Sans abonnement"}
                 </p>
                 {isSubscribed && plan && (
-                  <p className="mt-0.5 text-sm text-zinc-400">
+                  <p className="mt-0.5 text-sm text-fg-muted">
                     {formatGenerationsLimit(plan)}
                   </p>
                 )}
               </div>
 
-              <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+              <div className="rounded-xl border border-line bg-elevated/50 px-4 py-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                   Utilisation
                 </p>
-                <p className="mt-1 text-sm text-zinc-300">{usageLabel}</p>
+                <p className="mt-1 text-sm text-fg-subtle">{usageLabel}</p>
                 {demoMode && !stripeConfigured && (
                   <p className="mt-2 text-xs text-amber-400/90">
                     Mode démo — toutes les fonctionnalités sont accessibles.
@@ -456,11 +462,11 @@ export default function UserSettingsPage() {
             </SettingsSection>
           )}
 
-          <div className="border-t border-zinc-800 pt-4">
+          <div className="border-t border-line pt-4">
             <button
               type="button"
               onClick={() => logout()}
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:border-red-900/50 hover:bg-red-950/30 hover:text-red-300"
+              className="inline-flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-fg-subtle transition hover:border-red-900/50 hover:bg-red-950/30 hover:text-red-300"
             >
               <LogOut className="h-4 w-4" />
               Se déconnecter

@@ -1,11 +1,4 @@
-import {
-  ArrowRight,
-  Download,
-  ImagePlus,
-  Layers,
-  Package,
-  RefreshCw,
-} from "lucide-react";
+import { ArrowRight, ImagePlus, Layers, Package } from "lucide-react";
 import { MODES } from "../constants/modes";
 import { getModeTheme } from "../utils/modeTheme";
 
@@ -14,9 +7,7 @@ export default function PhotoActionBar({
   hasResult,
   queueCount,
   loading,
-  onUseAsBase,
   onNextPhoto,
-  onDownload,
   onExportPack,
   onChainDeclutterToFurnish,
 }) {
@@ -26,16 +17,6 @@ export default function PhotoActionBar({
 
   return (
     <div className="flex shrink-0 flex-wrap items-center gap-2 rounded-2xl border border-zinc-700/60 bg-panel/90 p-2 shadow-lg shadow-black/20 backdrop-blur-xl">
-      <button
-        type="button"
-        onClick={onUseAsBase}
-        className={`flex items-center gap-1.5 px-3.5 py-2 text-xs ${theme.btnPrimary}`}
-        title="Itérer sur ce résultat"
-      >
-        <RefreshCw className="h-3.5 w-3.5" />
-        Itérer
-      </button>
-
       <button
         type="button"
         onClick={onNextPhoto}
@@ -51,15 +32,6 @@ export default function PhotoActionBar({
             {queueCount}
           </span>
         )}
-      </button>
-
-      <button
-        type="button"
-        onClick={onDownload}
-        className="btn-secondary flex items-center gap-1.5 px-3.5 py-2 text-xs"
-      >
-        <Download className="h-3.5 w-3.5" />
-        Télécharger
       </button>
 
       {onExportPack && (

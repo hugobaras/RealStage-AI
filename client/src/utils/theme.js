@@ -3,11 +3,11 @@ export const THEMES = ["dark", "light"];
 export function getStoredTheme() {
   try {
     const raw = localStorage.getItem("realstage_prefs");
-    if (!raw) return "dark";
+    if (!raw) return "light";
     const prefs = JSON.parse(raw);
-    return prefs.theme === "light" ? "light" : "dark";
+    return prefs.theme === "dark" ? "dark" : "light";
   } catch {
-    return "dark";
+    return "light";
   }
 }
 

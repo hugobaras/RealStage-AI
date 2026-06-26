@@ -15,15 +15,19 @@ import TrialBanner from "./TrialBanner";
 import PaywallModal from "./PaywallModal";
 import QuotaModal from "./QuotaModal";
 import PropertyCreateModal from "./PropertyCreateModal";
+import ReportImageModal from "./ReportImageModal";
 import RoomChecklist from "./RoomChecklist";
 import { generateImage } from "../api/generate";
 import { fetchGenerations, toggleGenerationFavorite } from "../api/generations";
+import { reportGeneration } from "../api/reports";
 import { createProperty, fetchProperties } from "../api/properties";
 import { useAuth } from "../contexts/AuthContext";
 import { useSubscription } from "../contexts/SubscriptionContext";
 import { usePreferences } from "../hooks/usePreferences";
 import { useAgencySettings } from "../hooks/useAgencySettings";
 import { MODES, isStyleMode } from "../constants/modes";
+import { ROOM_TYPES } from "../constants/roomTypes";
+import { STYLES } from "../constants/styles";
 import { getAppBgClass } from "../utils/modeTheme";
 import {
   LISTING_STEPS,
@@ -48,6 +52,18 @@ import {
 import { getDefaultVariantStyles } from "./VariantPicker";
 
 const ACTIVE_PROPERTY_KEY = "realstage_active_property";
+
+function buildGenerationLabel(entry) {
+  if (!entry) return null;
+  const modeLabel = MODES[entry.mode]?.label ?? entry.mode;
+  const roomLabel =
+    ROOM_TYPES.find((room) => room.id === entry.roomType)?.label ??
+    entry.roomType;
+  const styleLabel = entry.style
+    ? (STYLES.find((style) => style.id === entry.style)?.label ?? entry.style)
+    : null;
+  return [modeLabel, roomLabel, styleLabel].filter(Boolean).join(" · ");
+}
 
 function buildGenerateLabel(mode, subscription) {
   const modeLabel = MODES[mode]?.generateLabel ?? "Générer";
@@ -146,6 +162,8 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   );
   const [propertyCreateOpen, setPropertyCreateOpen] = useState(false);
   const [propertyCreating, setPropertyCreating] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
   const listingMode = Boolean(prefs.listingMode);
   const [listingHint, setListingHint] = useState(null);
 
@@ -275,6 +293,11 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
     if (!activePropertyId) return history;
     return history.filter((h) => h.propertyId === activePropertyId);
   }, [history, activePropertyId]);
+
+  const activeGeneration = useMemo(() => {
+    if (!selectedHistoryId) return null;
+    return history.find((entry) => entry.id === selectedHistoryId) ?? null;
+  }, [history, selectedHistoryId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -825,6 +848,34 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
     [getIdToken],
   );
 
+  const openReportModal = useCallback(
+    (entry = null) => {
+      const target = entry ?? activeGeneration;
+      if (!target?.id) return;
+      setReportTarget(target);
+      setReportModalOpen(true);
+    },
+    [activeGeneration],
+  );
+
+  const handleReportSubmit = useCallback(
+    async ({ reason, comment }) => {
+      if (!reportTarget?.id) {
+        throw new Error("Aucune génération sélectionnée.");
+      }
+      const idToken = await getIdToken();
+      await reportGeneration(
+        {
+          generationId: reportTarget.id,
+          reason,
+          comment,
+        },
+        idToken,
+      );
+    },
+    [reportTarget, getIdToken],
+  );
+
   const handleExportPack = useCallback(
     async (entry = null) => {
       const before = entry?.baseImageUrl
@@ -969,7 +1020,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
 
   const workflowExtraBadge =
     listingMode && hasFeature("listingWorkflow") ? (
-      <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/40">
+      <span className="rounded-full bg-accent/20 px-3 py-1 text-xs font-semibold text-accent-light ring-1 ring-accent/40">
         {essentialDone}/{essentialTotal} pièces
       </span>
     ) : null;
@@ -1104,7 +1155,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
             />
           )}
           {listingHint && (
-            <div className="shrink-0 border-b border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-center text-xs text-emerald-300">
+            <div className="shrink-0 border-b border-accent/20 bg-accent/10 px-4 py-2 text-center text-xs text-accent-light">
               Prochaine pièce essentielle suggérée — configurez et générez.
             </div>
           )}
@@ -1155,6 +1206,14 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
                     onDownload={() => handleDownload()}
                     onExportPack={() => handleExportPack()}
                     onChainDeclutterToFurnish={handleChainDeclutterToFurnish}
+                    generationId={activeGeneration?.id ?? null}
+                    onReport={() => openReportModal()}
+                    isFavorite={activeGeneration?.favorite ?? false}
+                    onToggleFavorite={
+                      activeGeneration
+                        ? () => handleToggleFavorite(activeGeneration)
+                        : undefined
+                    }
                   />
                 </div>
 
@@ -1169,6 +1228,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
                   onDownload={handleDownload}
                   onToggleFavorite={handleToggleFavorite}
                   onExportPack={handleExportPack}
+                  onReport={openReportModal}
                   expanded={historyExpanded}
                   onExpandedChange={setHistoryExpanded}
                 />
@@ -1201,6 +1261,13 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
         onClose={() => setPropertyCreateOpen(false)}
         onCreate={handlePropertyCreate}
         loading={propertyCreating}
+      />
+      <ReportImageModal
+        open={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        onSubmit={handleReportSubmit}
+        mode={reportTarget?.mode ?? mode}
+        generationLabel={buildGenerationLabel(reportTarget)}
       />
     </div>
   );

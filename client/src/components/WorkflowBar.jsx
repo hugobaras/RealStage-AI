@@ -33,7 +33,7 @@ export default function WorkflowBar({
             return (
               <div key={step.id} className="flex items-center gap-1 sm:gap-2">
                 {index > 0 && (
-                  <ChevronRight className="hidden h-3.5 w-3.5 text-zinc-600 sm:block" />
+                  <ChevronRight className="hidden h-3.5 w-3.5 text-fg-subtle sm:block" />
                 )}
                 <div
                   className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition sm:px-3 sm:py-1.5 sm:text-sm ${
@@ -41,7 +41,7 @@ export default function WorkflowBar({
                       ? `${theme.bg} text-white ${theme.shadowLg}`
                       : done
                         ? `${theme.bgSubtle} ${theme.text} ring-1 ${theme.border}`
-                        : "bg-zinc-800/80 text-zinc-500"
+                        : "bg-elevated/80 text-fg-muted"
                   }`}
                 >
                   {done ? (
@@ -49,7 +49,7 @@ export default function WorkflowBar({
                   ) : (
                     <span
                       className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
-                        current ? "bg-white/20" : "bg-zinc-700"
+                        current ? "bg-white/20" : "bg-elevated"
                       }`}
                     >
                       {index + 1}

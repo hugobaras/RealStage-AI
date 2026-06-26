@@ -26,11 +26,11 @@ export const MODES = {
     generateLabel: "Remplacer",
     loadingLabel: "Remplacement IA en cours…",
     theme: {
-      accent: "violet",
-      bar: "from-violet-500/20 via-violet-500/5 to-transparent",
-      border: "border-violet-500/50",
-      glow: "shadow-violet-500/25",
-      pill: "bg-violet-600",
+      accent: "estate-blue",
+      bar: "from-estate-blue/20 via-estate-blue/5 to-transparent",
+      border: "border-estate-blue/50",
+      glow: "shadow-estate-blue/25",
+      pill: "bg-estate-blue",
     },
   },
   desencombrer: {
@@ -43,11 +43,11 @@ export const MODES = {
     generateLabel: "Vider",
     loadingLabel: "Vider IA en cours…",
     theme: {
-      accent: "emerald",
-      bar: "from-emerald-500/20 via-emerald-500/5 to-transparent",
-      border: "border-emerald-500/50",
-      glow: "shadow-emerald-500/25",
-      pill: "bg-emerald-600",
+      accent: "estate-stone",
+      bar: "from-estate-stone/20 via-estate-stone/5 to-transparent",
+      border: "border-estate-stone/50",
+      glow: "shadow-estate-stone/25",
+      pill: "bg-estate-stone",
     },
   },
 };

@@ -1,5 +1,12 @@
 import { useRef } from "react";
-import { Image as ImageIcon, Loader2, Upload } from "lucide-react";
+import {
+  Download,
+  Flag,
+  Image as ImageIcon,
+  Loader2,
+  RefreshCw,
+  Star,
+} from "lucide-react";
 import { MODES } from "../constants/modes";
 import { getModeTheme } from "../utils/modeTheme";
 import ImageCompareSlider from "./ImageCompareSlider";
@@ -26,8 +33,14 @@ export default function ImageCanvas({
   onDownload,
   onExportPack,
   onChainDeclutterToFurnish,
+  generationId,
+  onReport,
+  isFavorite = false,
+  onToggleFavorite,
 }) {
   const theme = getModeTheme(mode);
+  const overlayBtnClass =
+    "flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium text-zinc-300 transition hover:bg-zinc-800/80 hover:text-white";
   const inputRef = useRef(null);
   const showCompare =
     Boolean(beforeImage) && Boolean(afterImage) && beforeImage !== afterImage;
@@ -136,15 +149,55 @@ export default function ImageCanvas({
           </button>
         )}
 
-        {afterImage && !loading && (
-          <button
-            type="button"
-            onClick={openFilePicker}
-            className="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-xl border border-zinc-700/80 bg-panel/90 px-3 py-2 text-xs font-medium text-zinc-300 shadow-lg backdrop-blur-md transition hover:border-zinc-600 hover:text-white"
-          >
-            <Upload className="h-3.5 w-3.5" />
-            Importer
-          </button>
+        {hasResult && !loading && (
+          <div className="absolute right-3 top-3 z-10 flex items-center gap-0.5 rounded-xl border border-zinc-700/80 bg-panel/90 p-1 shadow-lg backdrop-blur-md">
+            {generationId && onToggleFavorite && (
+              <button
+                type="button"
+                onClick={onToggleFavorite}
+                className={`${overlayBtnClass} ${
+                  isFavorite ? "text-amber-400 hover:text-amber-300" : ""
+                }`}
+                title={
+                  isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"
+                }
+              >
+                <Star
+                  className={`h-3.5 w-3.5 ${isFavorite ? "fill-current" : ""}`}
+                />
+                <span className="hidden sm:inline">Favori</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onUseAsBase}
+              className={overlayBtnClass}
+              title="Utiliser comme base"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Utiliser comme base</span>
+            </button>
+            <button
+              type="button"
+              onClick={onDownload}
+              className={overlayBtnClass}
+              title="Télécharger"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Télécharger</span>
+            </button>
+            {generationId && onReport && (
+              <button
+                type="button"
+                onClick={onReport}
+                className={overlayBtnClass}
+                title="Signaler un problème avec ce résultat"
+              >
+                <Flag className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Signaler</span>
+              </button>
+            )}
+          </div>
         )}
 
         {loading && (
@@ -174,9 +227,7 @@ export default function ImageCanvas({
         hasResult={hasResult}
         queueCount={queueCount}
         loading={loading}
-        onUseAsBase={onUseAsBase}
         onNextPhoto={onNextPhoto}
-        onDownload={onDownload}
         onExportPack={onExportPack}
         onChainDeclutterToFurnish={onChainDeclutterToFurnish}
       />

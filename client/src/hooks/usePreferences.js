@@ -10,7 +10,7 @@ const DEFAULTS = {
   deepThinking: true,
   roomSqm: null,
   listingMode: false,
-  theme: "dark",
+  theme: "light",
 };
 
 const listeners = new Set();

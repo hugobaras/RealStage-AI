@@ -8,7 +8,8 @@ export const ENV_PATH = path.resolve(__dirname, "../.env");
 dotenv.config({ path: ENV_PATH });
 
 export function getFalConfig() {
-  const declutterModel = process.env.FAL_DECLUTTER_MODEL || "fal-ai/flux-2/edit";
+  const declutterModel =
+    process.env.FAL_DECLUTTER_MODEL || "fal-ai/flux-2/edit";
   return {
     key: process.env.FAL_KEY,
     model:
@@ -66,6 +67,33 @@ export function getStripeConfig() {
     webhookSecret,
     clientUrl,
     prices,
+    configured,
+  };
+}
+
+export function getEmailConfig() {
+  const host = process.env.SMTP_HOST?.trim() || null;
+  const portRaw = process.env.SMTP_PORT?.trim();
+  const port = portRaw ? Number(portRaw) : null;
+  const secure = process.env.SMTP_SECURE?.trim() === "true";
+  const user = process.env.SMTP_USER?.trim() || null;
+  const pass = process.env.SMTP_PASS?.trim() || null;
+  const from =
+    process.env.SMTP_FROM?.trim() || "RealStage AI <noreply@realstage.ai>";
+  const reportTo = process.env.REPORT_EMAIL_TO?.trim() || null;
+
+  const configured = Boolean(
+    host && port && !Number.isNaN(port) && user && pass && reportTo,
+  );
+
+  return {
+    host,
+    port,
+    secure,
+    user,
+    pass,
+    from,
+    reportTo,
     configured,
   };
 }

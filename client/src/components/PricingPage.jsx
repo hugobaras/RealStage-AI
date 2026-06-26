@@ -56,12 +56,14 @@ function PlanCard({
             ? "border-accent/60 bg-accent/10 shadow-xl shadow-accent/20 ring-1 ring-accent/40"
             : isPopular
               ? "border-accent/50 bg-accent/5 shadow-xl shadow-accent/15 hover:-translate-y-1"
-              : "border-zinc-800/80 bg-panel/80 hover:-translate-y-1 hover:border-zinc-700 hover:shadow-xl"
+              : "border-line/80 bg-panel/80 hover:-translate-y-1 hover:border-line hover:shadow-xl"
         }`}
       >
-        <h3 className="text-lg font-semibold text-white">{plan.label}</h3>
+        <h3 className="font-display text-lg font-semibold text-fg">
+          {plan.label}
+        </h3>
         <div className="mt-3 flex items-baseline gap-1">
-          <span className="text-4xl font-bold text-white">
+          <span className="font-display text-4xl font-semibold text-fg">
             {plan.priceMonthly} €
           </span>
           <span className="text-sm text-muted">/ mois</span>
@@ -77,7 +79,7 @@ function PlanCard({
               className={`flex items-start gap-2.5 text-sm ${
                 index === 0 && plan.id !== "starter"
                   ? "font-semibold text-accent-light"
-                  : "text-zinc-300"
+                  : "text-fg-subtle"
               }`}
             >
               {index === 0 && plan.id !== "starter" ? (
@@ -99,7 +101,7 @@ function PlanCard({
               ? "border border-accent/50 bg-accent/20 text-accent-light"
               : isPopular
                 ? "btn-shimmer text-white shadow-lg shadow-accent/25 hover:scale-[1.02] disabled:opacity-50"
-                : "border border-zinc-700 text-white hover:bg-zinc-800 hover:scale-[1.02] disabled:opacity-50"
+                : "border border-line text-fg hover:bg-elevated-hover hover:scale-[1.02] disabled:opacity-50"
           }`}
         >
           {buttonLabel()}
@@ -187,10 +189,10 @@ export default function PricingPage() {
               </span>
             )}
 
-            <h1 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h1 className="mt-5 font-display text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
               Choisissez votre forfait
             </h1>
-            <p className="mx-auto mt-4 max-w-lg text-base text-zinc-400">
+            <p className="mx-auto mt-4 max-w-lg text-base text-fg-muted">
               {TRIAL_LIMIT} générations gratuites à l&apos;inscription, puis
               abonnement mensuel adapté à votre volume de photos.
             </p>
@@ -228,7 +230,7 @@ export default function PricingPage() {
             ))}
           </div>
 
-          <p className="mt-10 text-center text-sm text-zinc-500">
+          <p className="mt-10 text-center text-sm text-fg-muted">
             Résiliation libre · Sans frais cachés · Résultats instantanés
           </p>
         </main>

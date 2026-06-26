@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap"
       rel="stylesheet"
     />
     <link rel="icon" href="/realstage-logo.png" />
@@ -19,12 +19,17 @@
       (function () {
         try {
           var p = JSON.parse(localStorage.getItem("realstage_prefs") || "{}");
-          var theme = p.theme === "light" ? "light" : "dark";
+          var theme =
+            p.theme === "dark"
+              ? "dark"
+              : p.theme === "light"
+                ? "light"
+                : "light";
           document.documentElement.setAttribute("data-theme", theme);
           document.documentElement.style.colorScheme = theme;
         } catch (e) {
-          document.documentElement.setAttribute("data-theme", "dark");
-          document.documentElement.style.colorScheme = "dark";
+          document.documentElement.setAttribute("data-theme", "light");
+          document.documentElement.style.colorScheme = "light";
         }
       })();
     </script>

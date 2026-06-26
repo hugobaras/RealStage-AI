@@ -13,8 +13,8 @@ export const SHOWCASE_ITEMS = [
   {
     id: "remplacer",
     title: "Remplacer",
-    before: "/hero_compare/salon_2.png",
-    after: "/hero_compare/chambre_2.png",
+    before: "/hero_compare/chambre_1.png",
+    after: "/hero_compare/chambre_3.png",
   },
   {
     id: "desencombrer",

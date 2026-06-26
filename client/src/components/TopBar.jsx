@@ -43,10 +43,10 @@ export default function TopBar({
         )}
 
         <div className="min-w-0">
-          <h1 className="truncate text-sm font-bold text-white sm:text-base lg:text-lg">
+          <h1 className="truncate font-display text-sm font-semibold text-fg sm:text-base lg:text-lg">
             {activeProperty?.label ?? config.title}
           </h1>
-          <p className="mt-0.5 hidden truncate text-xs text-zinc-400 sm:block lg:text-sm">
+          <p className="mt-0.5 hidden truncate text-xs text-fg-muted sm:block lg:text-sm">
             {activeProperty?.address ?? config.subtitle}
           </p>
         </div>
@@ -64,14 +64,14 @@ export default function TopBar({
           onCreateClick={onPropertyCreateClick}
           hasFeature={hasFeature?.("multiProjects")}
         />
-        <div className="flex h-10 items-stretch overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900/30">
+        <div className="flex h-10 items-stretch overflow-hidden rounded-xl border border-line/80 bg-panel/30">
           <Link
             to="/settings"
-            className="flex items-center gap-2 px-3 text-sm font-medium text-white transition hover:bg-zinc-800/60"
+            className="flex items-center gap-2 px-3 text-sm font-medium text-fg transition hover:bg-elevated/60"
             title="Mon compte"
           >
             <User
-              className="h-4 w-4 shrink-0 text-zinc-400"
+              className="h-4 w-4 shrink-0 text-fg-muted"
               strokeWidth={1.5}
             />
             <span className="max-w-[100px] truncate sm:max-w-[140px]">
@@ -79,13 +79,13 @@ export default function TopBar({
             </span>
           </Link>
           <span
-            className="w-px self-center bg-zinc-700/80"
+            className="w-px self-center bg-elevated/80"
             aria-hidden="true"
           />
           <button
             type="button"
             onClick={() => logout()}
-            className="flex items-center justify-center px-3 text-zinc-400 transition hover:bg-zinc-800/60 hover:text-white"
+            className="flex items-center justify-center px-3 text-fg-muted transition hover:bg-elevated/60 hover:text-fg"
             title="Se déconnecter"
             aria-label="Se déconnecter"
           >
