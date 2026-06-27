@@ -15,6 +15,17 @@ function addOneMonth(date = new Date()) {
   return end;
 }
 
+function toFirestoreDate(value) {
+  if (value == null) return null;
+  const date =
+    value instanceof Date
+      ? value
+      : typeof value?.toDate === "function"
+        ? value.toDate()
+        : new Date(value);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
 async function getUserRef(uid) {
   initFirebaseAdmin();
   return getFirestore().collection("users").doc(uid);
@@ -339,7 +350,7 @@ export async function applyStripeSubscription(
       stripeCustomerId ?? data.subscription?.stripeCustomerId ?? null,
     stripeSubscriptionId:
       stripeSubscriptionId ?? data.subscription?.stripeSubscriptionId ?? null,
-    currentPeriodEnd: currentPeriodEnd ?? null,
+    currentPeriodEnd: toFirestoreDate(currentPeriodEnd),
     activatedAt:
       status === "active"
         ? (data.subscription?.activatedAt ?? now)

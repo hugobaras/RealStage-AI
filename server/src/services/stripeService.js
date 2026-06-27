@@ -40,6 +40,21 @@ function isActiveStripeStatus(status) {
   return status === "active" || status === "trialing";
 }
 
+/** Unix period end from Stripe subscription (handles test payloads + API variants). */
+export function parseStripePeriodEnd(subscription) {
+  const unix =
+    subscription?.current_period_end ??
+    subscription?.items?.data?.[0]?.current_period_end ??
+    null;
+
+  if (unix == null || !Number.isFinite(Number(unix))) {
+    return null;
+  }
+
+  const date = new Date(Number(unix) * 1000);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
 /**
  * Résout les abonnements multiples : conserve le forfait le plus élevé,
  * annule les doublons actifs côté Stripe, met à jour Firestore.
@@ -118,7 +133,7 @@ export async function reconcileCustomerSubscriptions(uid, customerId) {
     status,
     stripeCustomerId: customerId,
     stripeSubscriptionId: winner.sub.id,
-    currentPeriodEnd: new Date(winner.sub.current_period_end * 1000),
+    currentPeriodEnd: parseStripePeriodEnd(winner.sub),
     resetUsage: false,
   });
 
