@@ -50,6 +50,7 @@ router.post("/reports/generation", requireAuth, async (req, res, next) => {
       userEmail: req.user.email,
       reason,
       comment: trimmedComment || null,
+      generationOwnerUid: req.user.uid,
       generationMeta: {
         mode: generation.mode ?? null,
         roomType: generation.roomType ?? null,
@@ -69,6 +70,13 @@ router.post("/reports/generation", requireAuth, async (req, res, next) => {
         console.error("Envoi e-mail signalement échoué:", emailErr);
       }
     }
+
+    const { notifyAdmins } = await import("../services/notificationService.js");
+    notifyAdmins({
+      trigger: "newReport",
+      subject: "Nouveau signalement RealStage AI",
+      text: `Signalement ${report.id} par ${req.user.email ?? req.user.uid}`,
+    }).catch(() => {});
 
     res.json({ ok: true, reportId: report.id });
   } catch (err) {

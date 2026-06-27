@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { PLANS } from "../config/plans.js";
+import { PLANS } from "../services/planService.js";
 import { getStripeConfig } from "../config.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import {

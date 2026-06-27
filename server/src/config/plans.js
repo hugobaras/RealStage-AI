@@ -7,6 +7,7 @@ export const PLANS = {
     priceMonthly: 19,
     generationsPerMonth: 30,
     deepThinkingPerMonth: 10,
+    stripePriceId: null,
     features: [
       "30 générations / mois",
       "10 réflexions approfondies / mois",
@@ -21,6 +22,7 @@ export const PLANS = {
     priceMonthly: 39,
     generationsPerMonth: 100,
     deepThinkingPerMonth: 50,
+    stripePriceId: null,
     popular: true,
     features: [
       "100 générations / mois",
@@ -36,6 +38,7 @@ export const PLANS = {
     priceMonthly: 99,
     generationsPerMonth: null,
     deepThinkingPerMonth: null,
+    stripePriceId: null,
     features: [
       "Générations illimitées",
       "Réflexion approfondie illimitée",
@@ -49,15 +52,15 @@ export const PLANS = {
 
 export const PLAN_IDS = Object.keys(PLANS);
 
-export function getPlan(planId) {
+const PLAN_RANK = { starter: 0, pro: 1, agence: 2 };
+
+export function getPlanFromStatic(planId) {
   return PLANS[planId] ?? null;
 }
 
-export function isValidPlanId(planId) {
+export function isValidPlanIdStatic(planId) {
   return planId in PLANS;
 }
-
-const PLAN_RANK = { starter: 0, pro: 1, agence: 2 };
 
 export function getPlanRank(planId) {
   if (!planId) return -1;

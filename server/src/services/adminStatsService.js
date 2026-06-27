@@ -1,6 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { PLANS } from "../config/plans.js";
+import { PLANS } from "./planService.js";
 import { initFirebaseAdmin, isFirebaseConfigured } from "./firebaseAdmin.js";
 import { countOpenReports } from "./reportStore.js";
 

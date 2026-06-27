@@ -12,6 +12,8 @@ const SECTIONS = [
   "plans",
   "features",
   "generationTuning",
+  "landing",
+  "announcements",
 ];
 
 router.get("/:section", (req, res) => {

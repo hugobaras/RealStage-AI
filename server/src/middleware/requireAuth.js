@@ -24,7 +24,9 @@ export async function requireAuth(req, res, next) {
       uid: decoded.uid,
       email: decoded.email ?? null,
       name: decoded.name ?? null,
-      admin: decoded.admin === true,
+      admin: decoded.admin === true || Boolean(decoded.role),
+      role: decoded.role ?? (decoded.admin === true ? "super_admin" : null),
+      impersonating: decoded.impersonating === true,
     };
     return next();
   } catch {

@@ -14,6 +14,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useAdmin } from "../contexts/AdminContext";
 import { useSubscription } from "../contexts/SubscriptionContext";
 import { usePreferences } from "../hooks/usePreferences";
+import { patchMePreferences } from "../api/preferences";
 import AppShell from "./AppShell";
 import MobileAppNav from "./MobileAppNav";
 import ThemeToggle from "./ThemeToggle";
@@ -56,7 +57,8 @@ function providerLabel(user) {
 }
 
 export default function UserSettingsPage() {
-  const { user, logout, updateDisplayName, changePassword } = useAuth();
+  const { user, logout, updateDisplayName, changePassword, getIdToken } =
+    useAuth();
   const { isAdmin } = useAdmin();
   const { prefs, setPref } = usePreferences();
   const {
@@ -375,6 +377,34 @@ export default function UserSettingsPage() {
               Checklist des pièces essentielles et workflow guidé pour préparer
               une annonce immobilière.
             </p>
+            <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-elevated/50 px-4 py-3">
+              <input
+                type="checkbox"
+                checked={Boolean(prefs.aiLabelEnabled)}
+                onChange={async (e) => {
+                  const checked = e.target.checked;
+                  setPref("aiLabelEnabled", checked);
+                  try {
+                    const idToken = await getIdToken();
+                    await patchMePreferences(idToken, {
+                      exportPrefs: { aiLabelEnabled: checked },
+                    });
+                  } catch {
+                    // sync best-effort
+                  }
+                }}
+                className="mt-0.5 rounded border-line"
+              />
+              <span className="min-w-0">
+                <span className="block text-sm font-medium text-fg">
+                  Mention IA sur les exports
+                </span>
+                <span className="mt-1 block text-xs text-fg-muted">
+                  Ajoute « Image générée par IA » en bas des photos téléchargées
+                  et des packs ZIP.
+                </span>
+              </span>
+            </label>
           </SettingsSection>
 
           <SettingsSection

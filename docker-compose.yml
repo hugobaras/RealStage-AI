@@ -11,6 +11,7 @@ services:
         VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID}
         VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET:-}
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY:-}
+        MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
     container_name: realstage-ai
     restart: unless-stopped
     env_file:

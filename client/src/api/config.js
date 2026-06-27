@@ -42,6 +42,9 @@ export async function fetchCatalogSection(section) {
     plans: "/api/config/plans",
     features: "/api/config/features",
     generationTuning: "/api/config/generation-tuning",
+    platform: "/api/config/platform",
+    landing: "/api/config/landing",
+    announcements: "/api/config/announcements",
   };
   const path = paths[section];
   if (!path) throw new Error(`Section catalogue inconnue: ${section}`);

@@ -40,7 +40,7 @@ Copier `deploy/nginx.conf.example` tel quel (bloc HTTP uniquement) :
 sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/realstage
 sudo ln -sf /etc/nginx/sites-available/realstage /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d realstage-ai.tech
+sudo certbot --nginx -d realstage-ai.tech -d www.realstage-ai.tech
 ```
 
 Certbot ajoute HTTPS automatiquement. **Ne pas** ajouter de bloc `listen 443` à la main avant d’avoir les certificats.
@@ -91,6 +91,26 @@ Après déploiement sur un nouveau domaine, configurer **Firebase Console** :
    ```
 
 En cas d'erreur, ouvrir la console navigateur (F12) : le code Firebase (`auth/unauthorized-domain`, etc.) s'affiche dans les logs.
+
+## Chat support (Mistral RAG + Discord)
+
+Variables serveur dans `.env.production` :
+
+```env
+MISTRAL_API_KEY=...
+DISCORD_BOT_TOKEN=...
+DISCORD_SUPPORT_CHANNEL_ID=...
+```
+
+- **Mistral** : clé API sur [console.mistral.ai](https://console.mistral.ai). Sans clé, l’assistant propose uniquement l’escalade agent.
+- **Index RAG** : construit au build Docker si `MISTRAL_API_KEY` est passée en `ARG` au build (`docker compose build`). Sinon, reconstruire manuellement :
+  ```bash
+  docker compose exec realstage npm run build:rag
+  docker compose restart realstage
+  ```
+- **Discord** : créer un bot ([Discord Developer Portal](https://discord.com/developers/applications)), activer les intents `Message Content`, inviter le bot sur votre serveur avec droit « Gérer les fils », copier l’ID du canal support. Les agents répondent dans le fil créé ; `/close` clôt la session.
+
+Nginx : le fichier `deploy/nginx.conf.example` inclut les en-têtes WebSocket requis pour Socket.io (chat temps réel).
 
 - Vous modifiez une variable `VITE_*` → `docker compose build --no-cache`
 - Vous modifiez uniquement le `.env` serveur (FAL, Stripe…) → `docker compose up -d` suffit

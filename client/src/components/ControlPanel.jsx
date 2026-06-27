@@ -313,6 +313,8 @@ export default function ControlPanel({
   onGenerationTuningChange,
   canUseGenerationTuning,
   onUpgradeForTuning,
+  aiLabelEnabled,
+  onAiLabelEnabledChange,
 }) {
   const isDeclutter = mode === "desencombrer";
   const showStyleOptions = isStyleMode(mode);
@@ -379,6 +381,23 @@ export default function ControlPanel({
         disabled={!hasAdjustableImage || loading}
         theme={theme}
       />
+      <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-line/80 bg-surface/40 px-3 py-2.5">
+        <input
+          type="checkbox"
+          checked={Boolean(aiLabelEnabled)}
+          onChange={(e) => onAiLabelEnabledChange?.(e.target.checked)}
+          className="mt-0.5 rounded border-line"
+        />
+        <span className="min-w-0">
+          <span className="block text-sm font-medium text-fg">
+            Mention IA sur les exports
+          </span>
+          <span className="mt-0.5 block text-[11px] leading-snug text-fg-muted">
+            Ajoute « Image générée par IA » en bas des photos téléchargées et
+            exportées.
+          </span>
+        </span>
+      </label>
       <button
         type="button"
         onClick={onDownload}

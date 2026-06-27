@@ -31,6 +31,10 @@ ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
 
 RUN npm run build --workspace=@realstage-ai/client
 
+ARG MISTRAL_API_KEY
+ENV MISTRAL_API_KEY=$MISTRAL_API_KEY
+RUN npm run build:rag --workspace=@realstage-ai/server || echo "RAG index skipped (MISTRAL_API_KEY absent)"
+
 FROM node:22-bookworm-slim AS production
 
 WORKDIR /app
@@ -46,6 +50,7 @@ RUN npm ci --omit=dev --workspace=@realstage-ai/server
 
 COPY server ./server
 COPY --from=build /app/client/dist ./server/public
+COPY --from=build /app/server/data/rag ./server/data/rag
 # Constantes UI pour le seed admin (optionnel en prod)
 COPY --from=build /app/client/src/constants /app/client/src/constants
 

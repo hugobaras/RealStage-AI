@@ -1,6 +1,10 @@
 import Stripe from "stripe";
 import { getStripeConfig } from "../config.js";
-import { getPlanRank, isValidPlanId } from "../config/plans.js";
+import {
+  getPlanRank,
+  isValidPlanId,
+  getStripePriceIdForPlan,
+} from "./planService.js";
 import { applyStripeSubscription } from "./subscriptionService.js";
 
 let stripeClient = null;
@@ -21,8 +25,7 @@ export function getStripe() {
 }
 
 export function getPriceIdForPlan(planId) {
-  const { prices } = getStripeConfig();
-  return prices[planId] ?? null;
+  return getStripePriceIdForPlan(planId);
 }
 
 export function getPlanIdForPriceId(priceId) {
@@ -498,23 +501,43 @@ export async function handleCheckoutSessionCompleted(session) {
 }
 
 export async function handleStripeWebhook(event) {
+  let uid = null;
+
   switch (event.type) {
-    case "checkout.session.completed":
-      await handleCheckoutSessionCompleted(event.data.object);
+    case "checkout.session.completed": {
+      const session = event.data.object;
+      uid = session.metadata?.firebaseUid ?? null;
+      await handleCheckoutSessionCompleted(session);
       break;
+    }
     case "customer.subscription.created":
     case "customer.subscription.updated":
-      await syncStripeSubscription(event.data.object);
+    case "customer.subscription.deleted": {
+      const subscription = event.data.object;
+      uid =
+        subscription.metadata?.firebaseUid ??
+        (await resolveUidFromCustomer(subscription.customer));
+      if (event.type === "customer.subscription.deleted") {
+        await syncStripeSubscription({
+          ...subscription,
+          status: "canceled",
+        });
+      } else {
+        await syncStripeSubscription(subscription);
+      }
       break;
-    case "customer.subscription.deleted":
-      await syncStripeSubscription({
-        ...event.data.object,
-        status: "canceled",
-      });
+    }
+    case "invoice.payment_failed":
+    case "invoice.paid": {
+      const invoice = event.data.object;
+      uid = await resolveUidFromCustomer(invoice.customer);
       break;
+    }
     default:
       break;
   }
+
+  return { uid };
 }
 
 export async function cancelStripeSubscription(uid) {

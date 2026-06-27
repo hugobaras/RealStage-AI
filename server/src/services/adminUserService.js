@@ -1,9 +1,18 @@
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
-import { isValidPlanId } from "../config/plans.js";
+import { isValidPlanId } from "./planService.js";
 import { initFirebaseAdmin, isFirebaseConfigured } from "./firebaseAdmin.js";
 import { getSubscriptionState, getUserData } from "./subscriptionService.js";
 import { logAdminAction } from "./auditLogService.js";
+import { listGenerationsAdmin } from "./generationStore.js";
+import { listProperties } from "./propertyStore.js";
+import { syncSubscriptionForUser } from "./stripeService.js";
+import { getStripeCustomerUrl } from "./adminStripeService.js";
+
+function currentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
 
 function serializeTimestamp(value) {
   if (!value) return null;
@@ -34,7 +43,7 @@ async function countSubcollection(uid, name) {
   return snapshot.data().count;
 }
 
-async function buildUserSummary(authUser, firestoreData = {}) {
+export async function buildUserSummary(authUser, firestoreData = {}) {
   const subscription = normalizeSubscription(firestoreData);
   const usage = firestoreData.usage ?? {};
   const generationCount = await countSubcollection(
@@ -130,13 +139,19 @@ export async function getAdminUserDetail(uid) {
   const doc = await db.collection("users").doc(uid).get();
   const data = doc.exists ? doc.data() : {};
 
-  const [generationCount, propertyCount, subscriptionState] = await Promise.all(
-    [
-      countSubcollection(uid, "generations"),
-      countSubcollection(uid, "properties"),
-      getSubscriptionState(uid),
-    ],
-  );
+  const [
+    generationCount,
+    propertyCount,
+    subscriptionState,
+    generations,
+    properties,
+  ] = await Promise.all([
+    countSubcollection(uid, "generations"),
+    countSubcollection(uid, "properties"),
+    getSubscriptionState(uid),
+    listGenerationsAdmin({ uid, limit: 20 }),
+    listProperties(uid),
+  ]);
 
   return {
     ...(await buildUserSummary(authUser, data)),
@@ -144,6 +159,11 @@ export async function getAdminUserDetail(uid) {
     generationCount,
     propertyCount,
     subscriptionState,
+    generations,
+    properties,
+    stripeCustomerUrl: getStripeCustomerUrl(
+      data.subscription?.stripeCustomerId ?? null,
+    ),
   };
 }
 
@@ -190,24 +210,84 @@ export async function patchAdminUser(uid, body, adminUid) {
     updates.trialUsed = 0;
   }
 
+  if (body.extendedTrialDays !== undefined) {
+    const days = Math.max(0, Number(body.extendedTrialDays) || 0);
+    const expires = new Date();
+    expires.setDate(expires.getDate() + days);
+    updates.trialExpiresAt = expires;
+    updates.trialUsed = 0;
+  }
+
   if (body.resetCredits) {
     updates.creditsUsed = 0;
+  }
+
+  const month = currentMonthKey();
+  const usage = data.usage ?? {};
+
+  if (body.creditGenerations !== undefined) {
+    const credit = Math.max(0, Number(body.creditGenerations) || 0);
+    const currentCount = usage.month === month ? (usage.count ?? 0) : 0;
+    updates.usage = {
+      month,
+      count: Math.max(0, currentCount - credit),
+      deepThinkingCount:
+        usage.month === month ? (usage.deepThinkingCount ?? 0) : 0,
+    };
+  }
+
+  if (body.creditDeepThinking !== undefined) {
+    const credit = Math.max(0, Number(body.creditDeepThinking) || 0);
+    const currentDeep =
+      usage.month === month ? (usage.deepThinkingCount ?? 0) : 0;
+    const currentCount =
+      updates.usage?.count ?? (usage.month === month ? (usage.count ?? 0) : 0);
+    updates.usage = {
+      month,
+      count: currentCount,
+      deepThinkingCount: Math.max(0, currentDeep - credit),
+    };
   }
 
   if (body.disabled !== undefined) {
     await getAuth().updateUser(uid, { disabled: Boolean(body.disabled) });
   }
 
+  if (body.forceLogout) {
+    await getAuth().revokeRefreshTokens(uid);
+    await logAdminAction({
+      adminUid,
+      action: "force_logout",
+      target: uid,
+    });
+  }
+
   if (Object.keys(updates).length > 0) {
     await ref.set(updates, { merge: true });
   }
 
-  await logAdminAction({
-    adminUid,
-    action: "patch_user",
-    target: uid,
-    details: body,
-  });
+  const auditAction =
+    body.creditGenerations !== undefined ||
+    body.creditDeepThinking !== undefined
+      ? "credit_usage"
+      : "patch_user";
+
+  if (
+    Object.keys(updates).length > 0 ||
+    body.planId !== undefined ||
+    body.status !== undefined ||
+    body.resetMonthlyUsage ||
+    body.resetTrial ||
+    body.resetCredits ||
+    body.disabled !== undefined
+  ) {
+    await logAdminAction({
+      adminUid,
+      action: auditAction,
+      target: uid,
+      details: body,
+    });
+  }
 
   return getAdminUserDetail(uid);
 }
@@ -218,7 +298,14 @@ export async function setUserAdminClaim(uid, grant, adminUid) {
   }
 
   initFirebaseAdmin();
-  await getAuth().setCustomUserClaims(uid, { admin: Boolean(grant) });
+  if (grant) {
+    await getAuth().setCustomUserClaims(uid, {
+      admin: true,
+      role: "super_admin",
+    });
+  } else {
+    await getAuth().setCustomUserClaims(uid, { admin: false, role: null });
+  }
 
   await logAdminAction({
     adminUid,
@@ -229,6 +316,62 @@ export async function setUserAdminClaim(uid, grant, adminUid) {
   return getAdminUserDetail(uid);
 }
 
+export async function setUserAdminRole(uid, role, adminUid) {
+  const allowed = ["super_admin", "support", "readonly", null];
+  if (!allowed.includes(role)) {
+    throw Object.assign(new Error("Rôle admin invalide."), { status: 400 });
+  }
+
+  if (!isFirebaseConfigured()) {
+    throw Object.assign(new Error("Firebase non configuré."), { status: 503 });
+  }
+
+  initFirebaseAdmin();
+  if (role) {
+    await getAuth().setCustomUserClaims(uid, { admin: true, role });
+  } else {
+    await getAuth().setCustomUserClaims(uid, { admin: false, role: null });
+  }
+
+  await logAdminAction({
+    adminUid,
+    action: role ? "grant_admin" : "revoke_admin",
+    target: uid,
+    details: { role },
+  });
+
+  return getAdminUserDetail(uid);
+}
+
 export async function disableUser(uid, disabled, adminUid) {
   return patchAdminUser(uid, { disabled }, adminUid);
+}
+
+export async function forceLogoutUser(uid, adminUid) {
+  if (!isFirebaseConfigured()) {
+    throw Object.assign(new Error("Firebase non configuré."), { status: 503 });
+  }
+
+  initFirebaseAdmin();
+  await getAuth().revokeRefreshTokens(uid);
+
+  await logAdminAction({
+    adminUid,
+    action: "force_logout",
+    target: uid,
+  });
+
+  return getAdminUserDetail(uid);
+}
+
+export async function syncStripeForUser(uid, adminUid) {
+  await syncSubscriptionForUser(uid);
+
+  await logAdminAction({
+    adminUid,
+    action: "sync_stripe",
+    target: uid,
+  });
+
+  return getAdminUserDetail(uid);
 }

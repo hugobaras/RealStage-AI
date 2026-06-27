@@ -9,6 +9,9 @@ const SECTIONS = {
   plans: "plans",
   features: "features",
   "generation-tuning": "generationTuning",
+  platform: "platform",
+  landing: "landing",
+  announcements: "announcements",
 };
 
 router.get("/:section", async (req, res, next) => {

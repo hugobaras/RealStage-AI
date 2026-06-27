@@ -24,6 +24,21 @@ npm run dev
 - Frontend : http://localhost:5173
 - Backend : http://localhost:3001
 
+## Chat support (RAG + Discord)
+
+Utilisateurs connectés : bulle de chat avec assistant Mistral (RAG sur FAQ, forfaits, modes, catalogue).
+
+```bash
+# server/.env
+MISTRAL_API_KEY=...
+DISCORD_BOT_TOKEN=...          # optionnel — pont agent humain
+DISCORD_SUPPORT_CHANNEL_ID=...
+
+npm run build:rag -w @realstage-ai/server
+```
+
+Les agents répondent dans un fil Discord ; les messages sont relayés en temps réel dans le widget (Socket.io).
+
 ## Structure
 
 - `client/` — React + Fabric.js (éditeur canvas)

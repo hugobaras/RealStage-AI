@@ -12,6 +12,7 @@ import WorkflowBar from "./WorkflowBar";
 import PhotoQueueStrip from "./PhotoQueueStrip";
 import BatchProgressBar from "./BatchProgressBar";
 import TrialBanner from "./TrialBanner";
+import AnnouncementBanner from "./AnnouncementBanner";
 import PaywallModal from "./PaywallModal";
 import QuotaModal from "./QuotaModal";
 import PropertyCreateModal from "./PropertyCreateModal";
@@ -53,10 +54,12 @@ import {
 } from "../utils/imageAdjustments";
 import { mergeLocalFavorites, setLocalFavorite } from "../utils/favorites";
 import {
+  applyImageLabel,
   downloadListingPack,
   downloadBatchListingPack,
   downloadPropertyListingPack,
 } from "../utils/exportPack";
+import { normalizeExportLabel } from "../constants/exportLabel";
 import { getDefaultVariantStyles } from "./VariantPicker";
 
 const ACTIVE_PROPERTY_KEY = "realstage_active_property";
@@ -186,6 +189,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   );
 
   const branding = hasFeature("agencyPresets") ? agencySettings : null;
+  const exportLabel = useMemo(() => normalizeExportLabel(prefs), [prefs]);
 
   const setMode = useCallback(
     (v) => {
@@ -554,12 +558,17 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
       if (!imageUrl) return;
       const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
       try {
-        await downloadImage(imageUrl, `realstage-${stamp}.jpg`);
+        let src = imageUrl;
+        const isGenerated = Boolean(baseImage) && imageUrl !== baseImage;
+        if (exportLabel && isGenerated) {
+          src = await applyImageLabel(imageUrl, exportLabel.text);
+        }
+        await downloadImage(src, `realstage-${stamp}.jpg`);
       } catch {
         setError("Impossible de télécharger l'image.");
       }
     },
-    [previewImage],
+    [previewImage, baseImage, exportLabel],
   );
 
   const runGenerateForImage = useCallback(
@@ -949,6 +958,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
           after,
           roomType: packRoomType,
           branding,
+          exportLabel,
           variants,
         });
       } catch {
@@ -957,7 +967,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
         setExportingPack(false);
       }
     },
-    [baseImage, previewImage, roomType, branding, activeVariants],
+    [baseImage, previewImage, roomType, branding, exportLabel, activeVariants],
   );
 
   const handleExportBatchPack = useCallback(async () => {
@@ -980,16 +990,24 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
           address: activeProperty.address,
           label: activeProperty.label,
           branding,
+          exportLabel,
         });
       } else {
-        await downloadBatchListingPack(batchResults, { branding });
+        await downloadBatchListingPack(batchResults, { branding, exportLabel });
       }
     } catch {
       setError("Impossible de créer le pack annonce.");
     } finally {
       setExportingPack(false);
     }
-  }, [batchResults, filteredHistory, activeProperty, hasFeature, branding]);
+  }, [
+    batchResults,
+    filteredHistory,
+    activeProperty,
+    hasFeature,
+    branding,
+    exportLabel,
+  ]);
 
   const handleChainDeclutterToFurnish = useCallback(async () => {
     if (!displayImage || loading) return;
@@ -1146,6 +1164,8 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
     onGenerationTuningChange: setGenerationTuning,
     canUseGenerationTuning: hasFeature("generationTuning"),
     onUpgradeForTuning: () => openPaywall("pro_required"),
+    aiLabelEnabled: prefs.aiLabelEnabled,
+    onAiLabelEnabledChange: (value) => setPref("aiLabelEnabled", value),
   };
 
   return (
@@ -1220,6 +1240,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
               onCancel={handleCancelBatch}
             />
           )}
+          <AnnouncementBanner />
           <TrialBanner mode={mode} />
 
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

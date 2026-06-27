@@ -6,6 +6,19 @@ import statsRouter from "./stats.js";
 import reportsRouter from "./reports.js";
 import generationsRouter from "./generations.js";
 import configRouter from "./config.js";
+import auditRouter from "./audit.js";
+import stripeRouter from "./stripe.js";
+import searchRouter from "./search.js";
+import blacklistRouter from "./blacklist.js";
+import complianceRouter from "./compliance.js";
+import billingRouter from "./billing.js";
+import agenciesRouter from "./agencies.js";
+import platformRouter from "./platform.js";
+import emailsRouter from "./emails.js";
+import notificationsRouter from "./notifications.js";
+import adminsRouter from "./admins.js";
+import systemRouter from "./system.js";
+import tuningRouter from "./tuning.js";
 
 const router = Router();
 
@@ -15,5 +28,18 @@ router.use("/stats", statsRouter);
 router.use("/reports", reportsRouter);
 router.use("/generations", generationsRouter);
 router.use("/config", configRouter);
+router.use("/audit", auditRouter);
+router.use("/stripe", stripeRouter);
+router.use("/search", searchRouter);
+router.use("/blacklist", blacklistRouter);
+router.use("/compliance", complianceRouter);
+router.use("/billing", billingRouter);
+router.use("/agencies", agenciesRouter);
+router.use("/platform", platformRouter);
+router.use("/emails", emailsRouter);
+router.use("/notifications", notificationsRouter);
+router.use("/admins", adminsRouter);
+router.use("/system", systemRouter);
+router.use("/tuning", tuningRouter);
 
 export default router;

@@ -127,7 +127,11 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Puis-je essayer gratuitement ?",
-    a: "Oui. À l'inscription, vous bénéficiez de 3 générations gratuites pour tester toutes les fonctionnalités avant de choisir un abonnement.",
+    a: "Oui : à l'inscription, vous bénéficiez de 3 générations gratuites pour tester toutes les fonctionnalités, sans carte bancaire. Il n'existe pas d'essai gratuit d'un mois sur les abonnements payants (Starter, Pro, Agence) : ceux-ci sont facturés dès le premier mois. Après les 3 générations gratuites, choisissez le forfait adapté à votre activité.",
+  },
+  {
+    q: "Puis-je réobtenir des générations gratuites ?",
+    a: "Non. Les 3 générations gratuites sont offertes une seule fois à l'inscription et ne peuvent pas être réobtenues ni réinitialisées. Pour continuer après l'essai, souscrivez à un abonnement payant (Starter 19 €/mois, Pro 39 €/mois ou Agence 99 €/mois), facturé dès le premier mois — sans essai gratuit mensuel sur ces forfaits.",
   },
   {
     q: "Quels formats d'images sont acceptés ?",

@@ -22,7 +22,19 @@ import configRouter from "./routes/config.js";
 import { initFirebaseAdmin } from "./services/firebaseAdmin.js";
 import { refreshConfigCache } from "./services/configStore.js";
 import { isStripeConfigured } from "./services/stripeService.js";
-import { formatFalError } from "./utils/falErrors.js";
+import agenciesRouter from "./routes/agencies.js";
+import { getConfigCacheSync } from "./services/configStore.js";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import chatRouter from "./routes/chat.js";
+import { initChatSocket } from "./services/chatSocket.js";
+import { setChatIo } from "./services/chatRealtime.js";
+import {
+  initDiscordBridge,
+  shutdownDiscordBridge,
+  isDiscordBridgeConfigured,
+} from "./services/discordBridgeService.js";
+import { getRagIndex } from "./services/ragService.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -50,13 +62,17 @@ app.use("/api", billingWebhookRouter);
 app.use(express.json({ limit: "15mb" }));
 
 app.get("/api/health", (_req, res) => {
+  const platform = getConfigCacheSync().platform ?? {};
   res.json({
-    status: "ok",
+    status: platform.maintenance?.enabled ? "maintenance" : "ok",
     product: "RealStage AI",
+    version: process.env.DEPLOY_VERSION ?? "0.1.0",
+    uptimeSeconds: Math.floor(process.uptime()),
     fal: {
       configured: falConfig.keyLoaded,
-      model: falConfig.model,
-      declutterModel: falConfig.declutterModel,
+      model: platform.falModels?.staging ?? falConfig.model,
+      declutterModel: platform.falModels?.declutter ?? falConfig.declutterModel,
+      replaceModel: platform.falModels?.replace ?? falConfig.replaceModel,
     },
     firebase: {
       configured: firebaseConfig.configured,
@@ -65,6 +81,7 @@ app.get("/api/health", (_req, res) => {
     stripe: {
       configured: stripeConfig.configured,
     },
+    maintenance: platform.maintenance ?? { enabled: false },
   });
 });
 
@@ -72,11 +89,13 @@ app.use("/api", authRouter);
 app.use("/api", subscriptionRouter);
 app.use("/api", propertiesRouter);
 app.use("/api", agencySettingsRouter);
+app.use("/api", agenciesRouter);
 app.use("/api", reportsRouter);
 app.use("/api/config", configRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api", generationsRouter);
 app.use("/api", generateRouter);
+app.use("/api", chatRouter);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(__dirname, "../public");
@@ -100,6 +119,10 @@ if (fs.existsSync(publicDir)) {
 app.use((err, _req, res, _next) => {
   console.error(err);
 
+  if (err.status && err.status >= 400 && err.status < 500) {
+    return res.status(err.status).json({ error: err.message });
+  }
+
   if (
     err.name === "SubscriptionError" ||
     err.name === "PlanError" ||
@@ -121,7 +144,34 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-const server = app.listen(PORT, "0.0.0.0", () => {
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: { origin: [...new Set(corsOrigins)], credentials: true },
+});
+setChatIo(io);
+initChatSocket(io);
+
+if (isDiscordBridgeConfigured()) {
+  console.log("Discord configuré — connexion du bot en cours…");
+  initDiscordBridge().catch((err) => {
+    console.error("Discord bridge:", err.message);
+  });
+} else {
+  console.warn(
+    "Discord non configuré — ajoutez DISCORD_BOT_TOKEN et DISCORD_SUPPORT_CHANNEL_ID dans server/.env",
+  );
+}
+
+const ragIndex = getRagIndex();
+if (ragIndex.chunks?.length) {
+  console.log(`Index RAG chargé (${ragIndex.chunks.length} chunks)`);
+} else {
+  console.warn(
+    "Index RAG absent — lancez npm run build:rag -w @realstage-ai/server (recherche par mots-clés en secours).",
+  );
+}
+
+const server = httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`RealStage AI server running on http://localhost:${PORT}`);
   if (!falConfig.keyLoaded) {
     console.warn(`FAL_KEY manquante — ajoutez-la dans ${ENV_PATH}`);
@@ -161,8 +211,12 @@ server.on("error", (err) => {
 });
 
 function shutdown() {
-  server.close(() => process.exit(0));
-  setTimeout(() => process.exit(0), 2000).unref();
+  shutdownDiscordBridge()
+    .catch(() => {})
+    .finally(() => {
+      server.close(() => process.exit(0));
+      setTimeout(() => process.exit(0), 2000).unref();
+    });
 }
 
 process.on("SIGINT", shutdown);

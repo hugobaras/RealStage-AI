@@ -57,6 +57,40 @@ function defaultTuningConfig() {
   };
 }
 
+function defaultBlacklistConfig() {
+  return { emails: [], domains: [], updatedAt: null };
+}
+
+function defaultPlatformConfig() {
+  return {
+    maintenance: { enabled: false, message: "" },
+    flags: {
+      modes: { meubler: true, desencombrer: true, remplacer: true },
+      generationTuning: true,
+    },
+    falModels: { staging: null, declutter: null, replace: null },
+    dailyGenerationCap: null,
+    updatedAt: null,
+  };
+}
+
+function defaultLandingConfig() {
+  return { faq: [], testimonials: [], stats: [], updatedAt: null };
+}
+
+function defaultAnnouncementsConfig() {
+  return { items: [], updatedAt: null };
+}
+
+function defaultAdminNotificationsConfig() {
+  return {
+    emails: [],
+    slackWebhookUrl: null,
+    triggers: { newReport: true, webhookError: true, usageSpike: false },
+    updatedAt: null,
+  };
+}
+
 function getDefaults() {
   return {
     styles: defaultStylesConfig(),
@@ -64,6 +98,11 @@ function getDefaults() {
     plans: defaultPlansConfig(),
     features: defaultFeaturesConfig(),
     generationTuning: defaultTuningConfig(),
+    blacklist: defaultBlacklistConfig(),
+    platform: defaultPlatformConfig(),
+    landing: defaultLandingConfig(),
+    announcements: defaultAnnouncementsConfig(),
+    adminNotifications: defaultAdminNotificationsConfig(),
   };
 }
 
@@ -98,14 +137,29 @@ export async function refreshConfigCache() {
     return cache;
   }
 
-  const [styles, roomTypes, plans, features, generationTuning] =
-    await Promise.all([
-      loadDoc("styles"),
-      loadDoc("roomTypes"),
-      loadDoc("plans"),
-      loadDoc("features"),
-      loadDoc("generationTuning"),
-    ]);
+  const [
+    styles,
+    roomTypes,
+    plans,
+    features,
+    generationTuning,
+    blacklist,
+    platform,
+    landing,
+    announcements,
+    adminNotifications,
+  ] = await Promise.all([
+    loadDoc("styles"),
+    loadDoc("roomTypes"),
+    loadDoc("plans"),
+    loadDoc("features"),
+    loadDoc("generationTuning"),
+    loadDoc("blacklist"),
+    loadDoc("platform"),
+    loadDoc("landing"),
+    loadDoc("announcements"),
+    loadDoc("adminNotifications"),
+  ]);
 
   cache = {
     styles: mergeConfig(defaults.styles, styles),
@@ -113,6 +167,14 @@ export async function refreshConfigCache() {
     plans: mergeConfig(defaults.plans, plans),
     features: mergeConfig(defaults.features, features),
     generationTuning: mergeConfig(defaults.generationTuning, generationTuning),
+    blacklist: mergeConfig(defaults.blacklist, blacklist),
+    platform: mergeConfig(defaults.platform, platform),
+    landing: mergeConfig(defaults.landing, landing),
+    announcements: mergeConfig(defaults.announcements, announcements),
+    adminNotifications: mergeConfig(
+      defaults.adminNotifications,
+      adminNotifications,
+    ),
   };
   cacheTime = Date.now();
   applyCatalogToPrompts(cache);

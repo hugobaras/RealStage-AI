@@ -2,6 +2,25 @@ import nodemailer from "nodemailer";
 import { getEmailConfig } from "../config.js";
 import { getReportReasonLabel } from "../constants/reportReasons.js";
 
+const EMAIL_TEMPLATES = {
+  welcome: {
+    subject: "Bienvenue sur RealStage AI",
+    html: "<p>Bienvenue ! Votre compte RealStage AI est prêt.</p>",
+  },
+  quota_reached: {
+    subject: "Quota de générations atteint",
+    html: "<p>Vous avez atteint votre quota mensuel de générations.</p>",
+  },
+  payment_failed: {
+    subject: "Échec de paiement",
+    html: "<p>Votre dernier paiement a échoué. Mettez à jour votre moyen de paiement.</p>",
+  },
+  generation_moderated: {
+    subject: "Modération de votre génération",
+    html: "<p>Une de vos générations a été modérée par notre équipe.</p>",
+  },
+};
+
 const MODE_LABELS = {
   meubler: "Meubler",
   desencombrer: "Désencombrer",
@@ -157,5 +176,48 @@ export async function sendGenerationReportEmail({
     subject,
     text,
     html,
+  });
+}
+
+export async function sendRawEmail({ to, subject, text, html }) {
+  const config = getEmailConfig();
+  if (!config.configured) return;
+  const transporter = getTransporter();
+  await transporter.sendMail({
+    from: config.from,
+    to,
+    subject,
+    text: text ?? subject,
+    html: html ?? text,
+  });
+}
+
+export function listEmailTemplates() {
+  return Object.entries(EMAIL_TEMPLATES).map(([id, tpl]) => ({
+    id,
+    subject: tpl.subject,
+    html: tpl.html,
+  }));
+}
+
+export async function sendTemplateEmail(to, templateId, vars = {}) {
+  const tpl = EMAIL_TEMPLATES[templateId];
+  if (!tpl) throw new Error("Template inconnu.");
+  let html = tpl.html;
+  for (const [key, val] of Object.entries(vars)) {
+    html = html.replaceAll(`{{${key}}}`, String(val ?? ""));
+  }
+  await sendRawEmail({ to, subject: tpl.subject, html, text: html });
+}
+
+export async function sendGenerationModeratedEmail({
+  email,
+  generation,
+  reason,
+}) {
+  if (!email) return;
+  await sendTemplateEmail(email, "generation_moderated", {
+    generationId: generation.id,
+    reason: reason ?? "Contenu signalé",
   });
 }

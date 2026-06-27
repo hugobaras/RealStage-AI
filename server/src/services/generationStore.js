@@ -62,6 +62,7 @@ async function resolveBaseImageUrl(data) {
 }
 
 async function toGenerationEntry(id, data) {
+  const moderation = data.moderation ?? null;
   return {
     id,
     imageUrl: await resolveImageUrl(data),
@@ -74,7 +75,18 @@ async function toGenerationEntry(id, data) {
     variantIndex: data.variantIndex ?? null,
     propertyId: data.propertyId ?? null,
     timestamp: data.createdAt?.toMillis?.() ?? Date.now(),
+    moderation: moderation
+      ? {
+          hidden: moderation.hidden ?? false,
+          sensitive: moderation.sensitive ?? false,
+          reason: moderation.reason ?? null,
+        }
+      : null,
   };
+}
+
+export async function toGenerationEntryFromDoc(id, data) {
+  return toGenerationEntry(id, data);
 }
 
 export async function saveGeneration(uid, payload) {
@@ -161,6 +173,8 @@ export async function listGenerations(uid, limit = 50, propertyId = null) {
   let entries = await Promise.all(
     snapshot.docs.map((doc) => toGenerationEntry(doc.id, doc.data())),
   );
+
+  entries = entries.filter((entry) => !entry.moderation?.hidden);
 
   if (propertyId) {
     entries = entries

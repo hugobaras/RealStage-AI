@@ -60,7 +60,7 @@ export default function AdminUsersPage() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher par e-mail, nom ou UID…"
+          placeholder="Rechercher par e-mail, nom, UID… (recherche globale : Stripe ID, ID génération)"
           className="w-full rounded-xl border border-line bg-elevated py-2.5 pl-10 pr-4 text-sm text-fg outline-none ring-accent/40 focus:ring-2"
         />
       </div>

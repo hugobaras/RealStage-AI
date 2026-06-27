@@ -5,6 +5,7 @@ import {
   seedAdminConfig,
   updateAdminConfig,
 } from "../../api/admin";
+import AdminPlansForm from "./AdminPlansForm";
 
 const TABS = [
   { id: "styles", label: "Styles" },
@@ -134,6 +135,8 @@ export default function AdminCatalogPage() {
         <div className="flex justify-center py-20">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-accent" />
         </div>
+      ) : tab === "plans" ? (
+        <AdminPlansForm />
       ) : (
         <>
           <textarea

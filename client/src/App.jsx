@@ -17,10 +17,22 @@ import AdminUserDetailPage from "./components/admin/AdminUserDetailPage";
 import AdminReportsPage from "./components/admin/AdminReportsPage";
 import AdminGenerationsPage from "./components/admin/AdminGenerationsPage";
 import AdminCatalogPage from "./components/admin/AdminCatalogPage";
+import AdminAuditPage from "./components/admin/AdminAuditPage";
+import AdminStripePage from "./components/admin/AdminStripePage";
+import AdminSearchPage from "./components/admin/AdminSearchPage";
+import AdminBlacklistPage from "./components/admin/AdminBlacklistPage";
+import AdminAgenciesPage from "./components/admin/AdminAgenciesPage";
+import AdminPlatformPage from "./components/admin/AdminPlatformPage";
+import AdminAdminsPage from "./components/admin/AdminAdminsPage";
+import AdminNotificationsPage from "./components/admin/AdminNotificationsPage";
+import AdminTuningLabPage from "./components/admin/AdminTuningLabPage";
+import AdminMarketingPage from "./components/admin/AdminMarketingPage";
+import AdminAnnouncementsPage from "./components/admin/AdminAnnouncementsPage";
 import {
   PropertiesListPage,
   default as PropertyWorkspacePage,
 } from "./components/PropertiesPage";
+import ChatWidget from "./components/ChatWidget";
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -76,12 +88,30 @@ function AppContent() {
                       element={<AdminGenerationsPage />}
                     />
                     <Route path="catalog" element={<AdminCatalogPage />} />
+                    <Route path="audit" element={<AdminAuditPage />} />
+                    <Route path="stripe" element={<AdminStripePage />} />
+                    <Route path="search" element={<AdminSearchPage />} />
+                    <Route path="blacklist" element={<AdminBlacklistPage />} />
+                    <Route path="agencies" element={<AdminAgenciesPage />} />
+                    <Route path="platform" element={<AdminPlatformPage />} />
+                    <Route path="admins" element={<AdminAdminsPage />} />
+                    <Route
+                      path="notifications"
+                      element={<AdminNotificationsPage />}
+                    />
+                    <Route path="tuning-lab" element={<AdminTuningLabPage />} />
+                    <Route path="marketing" element={<AdminMarketingPage />} />
+                    <Route
+                      path="announcements"
+                      element={<AdminAnnouncementsPage />}
+                    />
                   </Route>
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
           </div>
+          <ChatWidget />
         </CatalogProvider>
       </AdminProvider>
     </SubscriptionProvider>

@@ -100,17 +100,39 @@ function brandingFooterHeight(branding) {
   return h;
 }
 
+function aiLabelFooterHeight(exportLabel, scale = 1) {
+  if (!exportLabel?.enabled) return 0;
+  return Math.round(30 * scale);
+}
+
+function exportFooterHeight(branding, exportLabel, scale = 1) {
+  return (
+    brandingFooterHeight(branding) + aiLabelFooterHeight(exportLabel, scale)
+  );
+}
+
 function drawBrandingFooter(
   ctx,
   branding,
   canvasWidth,
   canvasHeight,
   scale = 1,
+  exportLabel = null,
 ) {
-  if (!branding) return;
-  const typo = brandingTypography(branding);
+  const typo = brandingTypography(branding ?? {});
   const marginX = Math.round(16 * scale);
   let y = canvasHeight - Math.round(8 * scale);
+
+  if (exportLabel?.enabled) {
+    drawStyledText(ctx, exportLabel.text, canvasWidth / 2, y, {
+      align: "center",
+      size: Math.round(13 * scale),
+      color: "#d4d4d4",
+    });
+    y -= aiLabelFooterHeight(exportLabel, scale);
+  }
+
+  if (!branding) return;
 
   if (branding.legalMentions) {
     drawStyledText(ctx, branding.legalMentions, marginX, y, {
@@ -126,6 +148,39 @@ function drawBrandingFooter(
       bold: typo.signatureBold,
     });
   }
+}
+
+/** Ajoute une bandeau « Image générée par IA » sous une photo exportée. */
+export async function applyImageLabel(imageSrc, text) {
+  if (!imageSrc || !text?.trim()) return imageSrc;
+
+  const img = await loadImage(imageSrc);
+  const scale = Math.max(0.75, Math.min(1.5, img.naturalWidth / 1200));
+  const barH = Math.round(36 * scale);
+  const fontSize = Math.round(14 * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight + barH;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0);
+  ctx.fillStyle = "rgba(0,0,0,0.72)";
+  ctx.fillRect(0, img.naturalHeight, canvas.width, barH);
+
+  drawStyledText(
+    ctx,
+    text.trim(),
+    canvas.width / 2,
+    img.naturalHeight + barH - Math.round(12 * scale),
+    {
+      align: "center",
+      size: fontSize,
+      color: "#e5e5e5",
+    },
+  );
+
+  return canvas.toDataURL("image/jpeg", 0.92);
 }
 
 function resolveLogoRect(
@@ -178,6 +233,7 @@ async function drawBrandingLogo(ctx, branding, region) {
 
 export async function composeSideBySide(beforeSrc, afterSrc, options = {}) {
   const branding = options.branding ?? null;
+  const exportLabel = options.exportLabel ?? null;
   const [before, after] = await Promise.all([
     loadImage(beforeSrc),
     loadImage(afterSrc),
@@ -188,7 +244,7 @@ export async function composeSideBySide(beforeSrc, afterSrc, options = {}) {
   const w2 = Math.round((after.naturalWidth / after.naturalHeight) * h);
   const gap = 8;
   const labelH = 48;
-  const footerH = branding ? brandingFooterHeight(branding) : 0;
+  const footerH = exportFooterHeight(branding, exportLabel);
 
   const canvas = document.createElement("canvas");
   canvas.width = w1 + w2 + gap;
@@ -212,13 +268,21 @@ export async function composeSideBySide(beforeSrc, afterSrc, options = {}) {
     margin: 16,
   });
 
-  drawBrandingFooter(ctx, branding, canvas.width, canvas.height);
+  drawBrandingFooter(
+    ctx,
+    branding,
+    canvas.width,
+    canvas.height,
+    1,
+    exportLabel,
+  );
 
   return canvas.toDataURL("image/jpeg", 0.92);
 }
 
 export async function composeStory(beforeSrc, afterSrc, options = {}) {
   const branding = options.branding ?? null;
+  const exportLabel = options.exportLabel ?? null;
   const [before, after] = await Promise.all([
     loadImage(beforeSrc),
     loadImage(afterSrc),
@@ -228,7 +292,7 @@ export async function composeStory(beforeSrc, afterSrc, options = {}) {
   const height = 1920;
   const halfH = Math.floor(height / 2);
   const gap = 4;
-  const footerH = branding ? brandingFooterHeight(branding) * 1.2 : 0;
+  const footerH = exportFooterHeight(branding, exportLabel, 1.2);
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -262,7 +326,16 @@ export async function composeStory(beforeSrc, afterSrc, options = {}) {
       margin: 24,
     });
 
-    drawBrandingFooter(ctx, branding, width, height + footerH, 1.2);
+    drawBrandingFooter(
+      ctx,
+      branding,
+      width,
+      height + footerH,
+      1.2,
+      exportLabel,
+    );
+  } else if (exportLabel?.enabled) {
+    drawBrandingFooter(ctx, null, width, height + footerH, 1.2, exportLabel);
   }
 
   return canvas.toDataURL("image/jpeg", 0.92);
@@ -270,16 +343,20 @@ export async function composeStory(beforeSrc, afterSrc, options = {}) {
 
 export async function composeVariantGrid(beforeSrc, variants, options = {}) {
   const branding = options.branding ?? null;
+  const exportLabel = options.exportLabel ?? null;
   const before = await loadImage(beforeSrc);
+  const afterSources = await Promise.all(
+    variants.map((v) => maybeLabelAfter(v.after ?? v.imageUrl, exportLabel)),
+  );
   const afterImages = await Promise.all(
-    variants.map((v) => loadImage(v.after ?? v.imageUrl)),
+    afterSources.map((src) => loadImage(src)),
   );
 
   const count = afterImages.length + 1;
   const cellH = 400;
   const gap = 8;
   const labelH = 36;
-  const footerH = branding ? brandingFooterHeight(branding) : 0;
+  const footerH = exportFooterHeight(branding, exportLabel);
   const totalW = count * 320 + (count - 1) * gap;
 
   const canvas = document.createElement("canvas");
@@ -311,8 +388,19 @@ export async function composeVariantGrid(beforeSrc, variants, options = {}) {
     drawLabel(ctx, labels[i], x + 8, 24, "left", 16);
   });
 
-  if (branding?.photoSignature || branding?.legalMentions) {
-    drawBrandingFooter(ctx, branding, canvas.width, canvas.height);
+  if (
+    branding?.photoSignature ||
+    branding?.legalMentions ||
+    exportLabel?.enabled
+  ) {
+    drawBrandingFooter(
+      ctx,
+      branding,
+      canvas.width,
+      canvas.height,
+      1,
+      exportLabel,
+    );
   }
 
   return canvas.toDataURL("image/jpeg", 0.92);
@@ -323,19 +411,25 @@ function prefixForIndex(index) {
   return `${String(index).padStart(2, "0")}-`;
 }
 
+async function maybeLabelAfter(src, exportLabel) {
+  if (!exportLabel?.enabled) return src;
+  return applyImageLabel(src, exportLabel.text);
+}
+
 async function buildRoomFiles({
   before,
   after,
   roomType,
   index,
   branding,
+  exportLabel,
   variants,
 }) {
   const slug = slugifyRoom(roomType);
   const prefix = prefixForIndex(index);
   const base = `${prefix}${slug}`;
 
-  const composeOpts = branding ? { branding } : {};
+  const composeOpts = { branding, exportLabel };
 
   const files = [];
 
@@ -346,7 +440,8 @@ async function buildRoomFiles({
     for (let i = 0; i < variants.length; i++) {
       const v = variants[i];
       const styleSlug = getStyleSlug(v.style);
-      const afterBlob = await resolveBlob(v.after ?? v.imageUrl);
+      const labeled = await maybeLabelAfter(v.after ?? v.imageUrl, exportLabel);
+      const afterBlob = await resolveBlob(labeled);
       files.push({ name: `${base}-apres-${styleSlug}.jpg`, blob: afterBlob });
     }
     const grid = await composeVariantGrid(before, variants, composeOpts);
@@ -355,12 +450,13 @@ async function buildRoomFiles({
       blob: await resolveBlob(grid),
     });
   } else {
-    const afterBlob = await resolveBlob(after);
+    const labeledAfter = await maybeLabelAfter(after, exportLabel);
+    const afterBlob = await resolveBlob(labeledAfter);
     files.push({ name: `${base}-apres.jpg`, blob: afterBlob });
 
     const [comparison, story] = await Promise.all([
-      composeSideBySide(before, after, composeOpts),
-      composeStory(before, after, composeOpts),
+      composeSideBySide(before, labeledAfter, composeOpts),
+      composeStory(before, labeledAfter, composeOpts),
     ]);
     files.push({
       name: `${base}-comparaison.jpg`,
@@ -381,6 +477,7 @@ export async function buildListingPack({
   roomType,
   index = null,
   branding = null,
+  exportLabel = null,
   variants = null,
 }) {
   const files = await buildRoomFiles({
@@ -389,6 +486,7 @@ export async function buildListingPack({
     roomType,
     index,
     branding,
+    exportLabel,
     variants,
   });
 
@@ -399,7 +497,10 @@ export async function buildListingPack({
   return zip.generateAsync({ type: "blob" });
 }
 
-export async function buildBatchListingPack(items, { branding } = {}) {
+export async function buildBatchListingPack(
+  items,
+  { branding, exportLabel } = {},
+) {
   const zip = new JSZip();
 
   for (let i = 0; i < items.length; i++) {
@@ -413,6 +514,7 @@ export async function buildBatchListingPack(items, { branding } = {}) {
       after,
       roomType,
       branding,
+      exportLabel,
       variants,
     });
 
@@ -426,7 +528,7 @@ export async function buildBatchListingPack(items, { branding } = {}) {
 
 export async function buildPropertyListingPack(
   items,
-  { address, label, branding } = {},
+  { address, label, branding, exportLabel } = {},
 ) {
   const zip = new JSZip();
   const root = slugifyAddress(address || label || "bien");
@@ -445,6 +547,7 @@ export async function buildPropertyListingPack(
       after: item.after,
       roomType: item.roomType,
       branding,
+      exportLabel,
       variants: item.variants,
     });
 

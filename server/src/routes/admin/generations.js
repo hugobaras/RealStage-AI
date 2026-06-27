@@ -3,6 +3,7 @@ import {
   deleteGeneration,
   listGenerationsAdmin,
 } from "../../services/generationStore.js";
+import { moderateGeneration } from "../../services/moderationService.js";
 import { logAdminAction } from "../../services/auditLogService.js";
 
 const router = Router();
@@ -30,6 +31,23 @@ router.delete("/:uid/:id", async (req, res, next) => {
       target: `${req.params.uid}/${req.params.id}`,
     });
     res.json(result);
+  } catch (err) {
+    if (err.status === 404) {
+      return res.status(404).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
+router.patch("/:uid/:id/moderate", async (req, res, next) => {
+  try {
+    const generation = await moderateGeneration(
+      req.params.uid,
+      req.params.id,
+      req.body ?? {},
+      req.user.uid,
+    );
+    res.json({ generation });
   } catch (err) {
     if (err.status === 404) {
       return res.status(404).json({ error: err.message });

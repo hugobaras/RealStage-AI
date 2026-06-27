@@ -71,6 +71,37 @@ export function getStripeConfig() {
   };
 }
 
+export function getMistralConfig() {
+  const apiKey = process.env.MISTRAL_API_KEY?.trim() || null;
+  return {
+    apiKey,
+    configured: Boolean(apiKey),
+    chatModel: process.env.MISTRAL_CHAT_MODEL?.trim() || "mistral-small-latest",
+    embedModel: process.env.MISTRAL_EMBED_MODEL?.trim() || "mistral-embed",
+  };
+}
+
+export function getDiscordConfig() {
+  const botToken = process.env.DISCORD_BOT_TOKEN?.trim() || null;
+  const supportChannelId =
+    process.env.DISCORD_SUPPORT_CHANNEL_ID?.trim() || null;
+  return {
+    botToken,
+    supportChannelId,
+    configured: Boolean(botToken && supportChannelId),
+  };
+}
+
+export function getRagConfig() {
+  const defaultPath = path.resolve(__dirname, "../data/rag/index.json");
+  const indexPath = process.env.RAG_INDEX_PATH?.trim()
+    ? path.isAbsolute(process.env.RAG_INDEX_PATH)
+      ? process.env.RAG_INDEX_PATH
+      : path.resolve(path.dirname(ENV_PATH), process.env.RAG_INDEX_PATH)
+    : defaultPath;
+  return { indexPath };
+}
+
 export function getEmailConfig() {
   const host = process.env.SMTP_HOST?.trim() || null;
   const portRaw = process.env.SMTP_PORT?.trim();

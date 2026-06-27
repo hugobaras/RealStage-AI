@@ -1,5 +1,5 @@
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import { getPlan, isValidPlanId, TRIAL_LIMIT } from "../config/plans.js";
+import { getPlan, isValidPlanId, TRIAL_LIMIT } from "./planService.js";
 import { getStripeConfig } from "../config.js";
 import { initFirebaseAdmin, isFirebaseConfigured } from "./firebaseAdmin.js";
 

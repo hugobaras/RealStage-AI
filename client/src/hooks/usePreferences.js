@@ -12,6 +12,8 @@ const DEFAULTS = {
   roomSqm: null,
   listingMode: false,
   theme: "light",
+  aiLabelEnabled: false,
+  aiLabelText: "Image générée par IA",
   generationTuning: { ...GENERATION_TUNING_DEFAULTS },
 };
 

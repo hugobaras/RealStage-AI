@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { Search, Trash2 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { deleteAdminGeneration, fetchAdminGenerations } from "../../api/admin";
+import {
+  deleteAdminGeneration,
+  fetchAdminGenerations,
+  moderateAdminGeneration,
+} from "../../api/admin";
 
 export default function AdminGenerationsPage() {
   const { getIdToken } = useAuth();
+  const [searchParams] = useSearchParams();
   const [generations, setGenerations] = useState([]);
-  const [uidFilter, setUidFilter] = useState("");
+  const [uidFilter, setUidFilter] = useState(searchParams.get("uid") ?? "");
   const [modeFilter, setModeFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,6 +38,16 @@ export default function AdminGenerationsPage() {
     const timer = setTimeout(() => load(), 300);
     return () => clearTimeout(timer);
   }, [load]);
+
+  const moderate = async (uid, id, body) => {
+    try {
+      const idToken = await getIdToken();
+      await moderateAdminGeneration(idToken, uid, id, body);
+      await load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const remove = async (uid, id) => {
     if (!window.confirm("Supprimer cette génération ?")) return;
@@ -106,14 +122,40 @@ export default function AdminGenerationsPage() {
               <p className="truncate text-xs text-fg-subtle" title={gen.uid}>
                 {gen.uid}
               </p>
-              <button
-                type="button"
-                onClick={() => remove(gen.uid, gen.id)}
-                className="inline-flex items-center gap-1 rounded-lg bg-red-500/15 px-2 py-1 text-xs text-red-300 hover:bg-red-500/25"
-              >
-                <Trash2 className="h-3 w-3" />
-                Supprimer
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    moderate(gen.uid, gen.id, {
+                      hidden: true,
+                      notifyUser: true,
+                    })
+                  }
+                  className="rounded-lg bg-elevated px-2 py-1 text-xs text-fg"
+                >
+                  Masquer
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    moderate(gen.uid, gen.id, {
+                      sensitive: true,
+                      reason: "Contenu sensible",
+                    })
+                  }
+                  className="rounded-lg bg-elevated px-2 py-1 text-xs text-fg"
+                >
+                  Sensible
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(gen.uid, gen.id)}
+                  className="inline-flex items-center gap-1 rounded-lg bg-red-500/15 px-2 py-1 text-xs text-red-300 hover:bg-red-500/25"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  Supprimer
+                </button>
+              </div>
             </div>
           </article>
         ))}

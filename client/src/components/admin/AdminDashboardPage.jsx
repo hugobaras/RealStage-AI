@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { fetchAdminStats, fetchHealth } from "../../api/admin";
+import {
+  fetchAdminStats,
+  fetchHealth,
+  fetchAiLabelCompliance,
+} from "../../api/admin";
 
 function StatCard({ label, value, sub }) {
   return (
@@ -16,6 +20,7 @@ export default function AdminDashboardPage() {
   const { getIdToken } = useAuth();
   const [stats, setStats] = useState(null);
   const [health, setHealth] = useState(null);
+  const [compliance, setCompliance] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -23,13 +28,15 @@ export default function AdminDashboardPage() {
     (async () => {
       try {
         const idToken = await getIdToken();
-        const [statsData, healthData] = await Promise.all([
+        const [statsData, healthData, complianceData] = await Promise.all([
           fetchAdminStats(idToken),
           fetchHealth(),
+          fetchAiLabelCompliance(idToken),
         ]);
         if (!cancelled) {
           setStats(statsData.stats);
           setHealth(healthData);
+          setCompliance(complianceData.stats);
         }
       } catch (err) {
         if (!cancelled) setError(err.message);
@@ -79,6 +86,13 @@ export default function AdminDashboardPage() {
           value={stats.generationsThisMonth}
         />
         <StatCard label="Signalements ouverts" value={stats.openReports} />
+        {compliance && (
+          <StatCard
+            label="Mention IA activée"
+            value={`${compliance.percentEnabled}%`}
+            sub={`${compliance.labelEnabledCount} / ${compliance.totalUsers} utilisateurs`}
+          />
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
