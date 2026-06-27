@@ -135,10 +135,7 @@ export default function PricingPage() {
     setSelecting(planId);
     try {
       const result = await startCheckout(planId);
-      if (
-        result?.upgraded ||
-        (result?.plan?.id === planId && !result?.clientSecret)
-      ) {
+      if (result?.plan?.id === planId && !result?.clientSecret) {
         navigate("/");
         return;
       }

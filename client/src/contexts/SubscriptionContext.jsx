@@ -79,18 +79,12 @@ export function SubscriptionProvider({ children }) {
 
       if (subscription?.stripeConfigured && isStripePublishableKeyConfigured) {
         const session = await createCheckoutSession(idToken, planId, true);
-        if (session.upgraded) {
-          const data = await syncBillingSubscription(idToken);
-          setSubscription(data);
-          closePaywall();
-          return data;
-        }
-        if (session.clientSecret) {
-          return session;
-        }
         if (session.url) {
           window.location.href = session.url;
           return null;
+        }
+        if (session.clientSecret) {
+          return session;
         }
         throw new Error("Session de paiement Stripe indisponible.");
       }

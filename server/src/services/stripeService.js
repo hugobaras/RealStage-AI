@@ -31,9 +31,10 @@ export function getPlanIdForPriceId(priceId) {
 
 function planIdFromSubscription(stripeSubscription) {
   const priceId = stripeSubscription.items?.data?.[0]?.price?.id;
-  return (
-    stripeSubscription.metadata?.planId ?? getPlanIdForPriceId(priceId) ?? null
-  );
+  const planFromPrice = getPlanIdForPriceId(priceId);
+  // Le prix actif prime sur les métadonnées (changement de forfait via portail).
+  if (planFromPrice) return planFromPrice;
+  return stripeSubscription.metadata?.planId ?? null;
 }
 
 function isActiveStripeStatus(status) {
@@ -173,6 +174,55 @@ export async function getOrCreateStripeCustomer(uid, email) {
   return customer.id;
 }
 
+/**
+ * Changement de forfait : portail Stripe avec confirmation de paiement
+ * (prorata facturé), au lieu d'une mise à jour silencieuse côté API.
+ */
+async function createPlanChangePortalSession({ planId, stripeSubscription }) {
+  const stripe = getStripe();
+  const { clientUrl } = getStripeConfig();
+  const priceId = getPriceIdForPlan(planId);
+  if (!priceId) {
+    throw new Error(`Prix Stripe manquant pour le forfait ${planId}.`);
+  }
+
+  const customerId =
+    typeof stripeSubscription.customer === "string"
+      ? stripeSubscription.customer
+      : stripeSubscription.customer?.id;
+
+  const itemId = stripeSubscription.items?.data?.[0]?.id;
+  if (!customerId || !itemId) {
+    throw new Error("Abonnement Stripe invalide.");
+  }
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: customerId,
+    return_url: `${clientUrl}/pricing`,
+    flow_data: {
+      type: "subscription_update_confirm",
+      subscription_update_confirm: {
+        subscription: stripeSubscription.id,
+        items: [
+          {
+            id: itemId,
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+      },
+      after_completion: {
+        type: "redirect",
+        redirect: {
+          return_url: `${clientUrl}/?checkout=success`,
+        },
+      },
+    },
+  });
+
+  return { url: session.url, planChange: true, planId };
+}
+
 export async function createCheckoutSession({
   uid,
   email,
@@ -202,39 +252,16 @@ export async function createCheckoutSession({
   const { data: freshData } = await getUserData(uid);
   const existingSubId = freshData.subscription?.stripeSubscriptionId;
   if (existingSubId && freshData.subscription?.status === "active") {
-    try {
-      const existing = await stripe.subscriptions.retrieve(existingSubId);
-      if (isActiveStripeStatus(existing.status)) {
-        const currentPlanId = planIdFromSubscription(existing);
-        if (currentPlanId === planId) {
-          throw new Error("Vous êtes déjà abonné à ce forfait.");
-        }
-
-        const updated = await stripe.subscriptions.update(existingSubId, {
-          items: [
-            {
-              id: existing.items.data[0].id,
-              price: priceId,
-            },
-          ],
-          metadata: {
-            firebaseUid: uid,
-            planId,
-          },
-          proration_behavior: "create_prorations",
-        });
-
-        await reconcileCustomerSubscriptions(uid, customerId);
-        return { upgraded: true, planId, subscriptionId: updated.id };
+    const existing = await stripe.subscriptions.retrieve(existingSubId);
+    if (isActiveStripeStatus(existing.status)) {
+      const currentPlanId = planIdFromSubscription(existing);
+      if (currentPlanId === planId) {
+        throw new Error("Vous êtes déjà abonné à ce forfait.");
       }
-    } catch (err) {
-      if (err.message === "Vous êtes déjà abonné à ce forfait.") {
-        throw err;
-      }
-      console.warn(
-        "Mise à niveau directe impossible, nouvelle session checkout:",
-        err.message,
-      );
+      return createPlanChangePortalSession({
+        planId,
+        stripeSubscription: existing,
+      });
     }
   }
 
