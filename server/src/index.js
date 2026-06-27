@@ -6,6 +6,9 @@ import {
 } from "./config.js";
 import express from "express";
 import cors from "cors";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import generateRouter from "./routes/generate.js";
 import generationsRouter from "./routes/generations.js";
 import authRouter from "./routes/auth.js";
@@ -75,6 +78,25 @@ app.use("/api/admin", adminRouter);
 app.use("/api", generationsRouter);
 app.use("/api", generateRouter);
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const publicDir = path.resolve(__dirname, "../public");
+
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir, { index: false }));
+  app.get("*", (req, res, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      return next();
+    }
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    res.sendFile(path.join(publicDir, "index.html"), (err) => {
+      if (err) next(err);
+    });
+  });
+  console.log(`Frontend statique servi depuis ${publicDir}`);
+}
+
 app.use((err, _req, res, _next) => {
   console.error(err);
 
@@ -99,7 +121,7 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`RealStage AI server running on http://localhost:${PORT}`);
   if (!falConfig.keyLoaded) {
     console.warn(`FAL_KEY manquante — ajoutez-la dans ${ENV_PATH}`);
