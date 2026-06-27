@@ -23,9 +23,9 @@ mkdir -p secrets
 cp /chemin/vers/votre-firebase-adminsdk.json secrets/firebase-service-account.json
 chmod 600 secrets/firebase-service-account.json
 
-# 3. Build et démarrage
-docker compose build --no-cache
-docker compose up -d
+# 3. Build et démarrage (--env-file pour les variables VITE_* au build)
+docker compose --env-file .env.production build --no-cache
+docker compose --env-file .env.production up -d
 
 # 4. Vérifier
 curl -s http://127.0.0.1:3011/api/health | jq
@@ -34,9 +34,18 @@ docker compose logs -f realstage
 
 ## Nginx (reverse proxy)
 
-Voir `deploy/nginx.conf.example`. Adapter `server_name` et activer TLS avec Certbot.
+Copier `deploy/nginx.conf.example` tel quel (bloc HTTP uniquement) :
 
-`CLIENT_URL` dans `.env.production` doit correspondre à l’URL publique (ex. `https://realstage.votredomaine.com`).
+```bash
+sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/realstage
+sudo ln -sf /etc/nginx/sites-available/realstage /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d realstage-ai.tech
+```
+
+Certbot ajoute HTTPS automatiquement. **Ne pas** ajouter de bloc `listen 443` à la main avant d’avoir les certificats.
+
+`CLIENT_URL` dans `.env.production` doit correspondre à l’URL publique (ex. `https://realstage-ai.tech`).
 
 ## Stripe webhook
 
@@ -57,7 +66,7 @@ docker compose ps
 docker compose logs -f realstage
 docker compose restart realstage
 docker compose down
-docker compose build --no-cache && docker compose up -d   # après changement VITE_*
+docker compose --env-file .env.production build --no-cache && docker compose --env-file .env.production up -d   # après changement VITE_*
 ```
 
 ## Rebuild obligatoire si…

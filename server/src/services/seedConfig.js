@@ -1,12 +1,4 @@
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
-import {
-  INTERIOR_STYLES,
-  OUTDOOR_STYLES,
-} from "../../../client/src/constants/styles.js";
-import {
-  ROOM_TYPES,
-  OUTDOOR_ROOM_IDS,
-} from "../../../client/src/constants/roomTypes.js";
 import { PLANS, TRIAL_LIMIT } from "../config/plans.js";
 import { FEATURES } from "../config/features.js";
 import { TUNING_DEFAULTS } from "./generationTuning.js";
@@ -15,9 +7,30 @@ import {
   STYLE_DEFINITIONS,
   OUTDOOR_ONLY_STYLE_PROMPTS,
   ROOM_PROMPTS,
+  OUTDOOR_ROOM_TYPES,
 } from "./promptBuilder.js";
 import { initFirebaseAdmin, isFirebaseConfigured } from "./firebaseAdmin.js";
 import { refreshConfigCache } from "./configStore.js";
+
+async function loadClientCatalog() {
+  try {
+    const [stylesMod, roomsMod] = await Promise.all([
+      import("../../../client/src/constants/styles.js"),
+      import("../../../client/src/constants/roomTypes.js"),
+    ]);
+    return {
+      styleItems: [...stylesMod.INTERIOR_STYLES, ...stylesMod.OUTDOOR_STYLES],
+      roomItems: roomsMod.ROOM_TYPES,
+      outdoorRoomTypeIds: [...roomsMod.OUTDOOR_ROOM_IDS],
+    };
+  } catch {
+    return {
+      styleItems: [],
+      roomItems: [],
+      outdoorRoomTypeIds: [...OUTDOOR_ROOM_TYPES],
+    };
+  }
+}
 
 export async function seedAllConfig(updatedBy = "system") {
   if (!isFirebaseConfigured()) {
@@ -26,17 +39,19 @@ export async function seedAllConfig(updatedBy = "system") {
 
   initFirebaseAdmin();
   const db = getFirestore();
+  const { styleItems, roomItems, outdoorRoomTypeIds } =
+    await loadClientCatalog();
 
   const payload = {
     styles: {
       definitions: STYLE_DEFINITIONS,
       outdoorOnlyDefinitions: OUTDOOR_ONLY_STYLE_PROMPTS,
-      items: [...INTERIOR_STYLES, ...OUTDOOR_STYLES],
+      items: styleItems,
     },
     roomTypes: {
       prompts: ROOM_PROMPTS,
-      outdoorRoomTypeIds: [...OUTDOOR_ROOM_IDS],
-      items: ROOM_TYPES,
+      outdoorRoomTypeIds,
+      items: roomItems,
     },
     plans: {
       items: Object.values(PLANS),

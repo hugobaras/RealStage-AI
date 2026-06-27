@@ -3,7 +3,6 @@ import {
   getConfigCacheSync,
   updateConfigSection,
 } from "../../services/configStore.js";
-import { seedAllConfig } from "../../services/seedConfig.js";
 import { logAdminAction } from "../../services/auditLogService.js";
 
 const router = Router();
@@ -48,6 +47,7 @@ router.put("/:section", async (req, res, next) => {
 
 router.post("/seed", async (req, res, next) => {
   try {
+    const { seedAllConfig } = await import("../../services/seedConfig.js");
     const config = await seedAllConfig(req.user.uid);
     await logAdminAction({
       adminUid: req.user.uid,

@@ -46,6 +46,8 @@ RUN npm ci --omit=dev --workspace=@realstage-ai/server
 
 COPY server ./server
 COPY --from=build /app/client/dist ./server/public
+# Constantes UI pour le seed admin (optionnel en prod)
+COPY --from=build /app/client/src/constants /app/client/src/constants
 
 ENV NODE_ENV=production
 ENV PORT=3011
