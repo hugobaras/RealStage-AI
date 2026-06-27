@@ -69,7 +69,28 @@ docker compose down
 docker compose --env-file .env.production build --no-cache && docker compose --env-file .env.production up -d   # après changement VITE_*
 ```
 
-## Rebuild obligatoire si…
+## Firebase Auth (connexion Google)
+
+Après déploiement sur un nouveau domaine, configurer **Firebase Console** :
+
+1. **Authentication → Paramètres → Domaines autorisés**  
+   Ajouter : `realstage-ai.tech` (sans `https://`)
+
+2. **Authentication → Méthode de connexion → Google**  
+   Activer le fournisseur et enregistrer.
+
+3. **Google Cloud Console** (projet `realstage-ai`) → **APIs et services → Identifiants**  
+   Client OAuth « Web client (auto created by Google Service) » :
+   - **Origines JavaScript autorisées** : `https://realstage-ai.tech`
+   - **URI de redirection** : `https://realstage-ai.firebaseapp.com/__/auth/handler`
+
+4. Rebuild Docker si les `VITE_FIREBASE_*` ont changé :
+   ```bash
+   docker compose --env-file .env.production build --no-cache
+   docker compose --env-file .env.production up -d
+   ```
+
+En cas d'erreur, ouvrir la console navigateur (F12) : le code Firebase (`auth/unauthorized-domain`, etc.) s'affiche dans les logs.
 
 - Vous modifiez une variable `VITE_*` → `docker compose build --no-cache`
 - Vous modifiez uniquement le `.env` serveur (FAL, Stripe…) → `docker compose up -d` suffit

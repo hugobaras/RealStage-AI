@@ -4,7 +4,7 @@ export const PLANS = [
   {
     id: "starter",
     label: "Starter",
-    priceMonthly: 29,
+    priceMonthly: 19,
     generationsPerMonth: 30,
     deepThinkingPerMonth: 10,
     features: [
@@ -18,7 +18,7 @@ export const PLANS = [
   {
     id: "pro",
     label: "Pro",
-    priceMonthly: 59,
+    priceMonthly: 39,
     generationsPerMonth: 100,
     deepThinkingPerMonth: 50,
     popular: true,
@@ -33,7 +33,7 @@ export const PLANS = [
   {
     id: "agence",
     label: "Agence",
-    priceMonthly: 149,
+    priceMonthly: 99,
     generationsPerMonth: null,
     deepThinkingPerMonth: null,
     features: [

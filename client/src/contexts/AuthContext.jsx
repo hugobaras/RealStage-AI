@@ -33,6 +33,18 @@ function mapAuthError(code) {
     "auth/invalid-credential": "Identifiants incorrects.",
     "auth/too-many-requests": "Trop de tentatives. Réessayez plus tard.",
     "auth/popup-closed-by-user": "Connexion Google annulée.",
+    "auth/popup-blocked":
+      "La popup a été bloquée par le navigateur. Autorisez les popups pour ce site.",
+    "auth/cancelled-popup-request":
+      "Une autre connexion est en cours. Fermez la popup et réessayez.",
+    "auth/unauthorized-domain":
+      "Ce domaine n'est pas autorisé dans Firebase. Ajoutez-le dans Console Firebase > Authentication > Paramètres > Domaines autorisés.",
+    "auth/operation-not-allowed":
+      "La connexion Google n'est pas activée dans Firebase (Authentication > Méthode de connexion > Google).",
+    "auth/network-request-failed":
+      "Erreur réseau. Vérifiez votre connexion et réessayez.",
+    "auth/internal-error":
+      "Erreur Firebase / Google OAuth. Vérifiez les domaines autorisés et la configuration OAuth.",
   };
   return messages[code] ?? "Une erreur est survenue. Réessayez.";
 }
@@ -98,6 +110,7 @@ export function AuthProvider({ children }) {
       const credential = await signInWithPopup(auth, provider);
       return credential.user;
     } catch (err) {
+      console.error("Google sign-in:", err.code, err.message);
       throw new Error(mapAuthError(err.code));
     }
   }, []);
