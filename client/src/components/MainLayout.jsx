@@ -27,7 +27,15 @@ import { usePreferences } from "../hooks/usePreferences";
 import { useAgencySettings } from "../hooks/useAgencySettings";
 import { MODES, isStyleMode } from "../constants/modes";
 import { ROOM_TYPES } from "../constants/roomTypes";
-import { STYLES } from "../constants/styles";
+import {
+  getStyleById,
+  resolveStyleForRoom,
+  getStylesForRoomType,
+} from "../constants/styles";
+import {
+  normalizeGenerationTuning,
+  toApiGenerationTuning,
+} from "../constants/generationTuning";
 import { getAppBgClass } from "../utils/modeTheme";
 import {
   LISTING_STEPS,
@@ -60,7 +68,7 @@ function buildGenerationLabel(entry) {
     ROOM_TYPES.find((room) => room.id === entry.roomType)?.label ??
     entry.roomType;
   const styleLabel = entry.style
-    ? (STYLES.find((style) => style.id === entry.style)?.label ?? entry.style)
+    ? (getStyleById(entry.style)?.label ?? entry.style)
     : null;
   return [modeLabel, roomLabel, styleLabel].filter(Boolean).join(" · ");
 }
@@ -122,8 +130,13 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   const [roomSqm, setRoomSqmState] = useState(
     prefs.roomSqm != null ? prefs.roomSqm : null,
   );
-  const [style, setStyleState] = useState(prefs.style);
+  const [style, setStyleState] = useState(() =>
+    resolveStyleForRoom(prefs.style, prefs.roomType),
+  );
   const [deepThinking, setDeepThinkingState] = useState(prefs.deepThinking);
+  const [generationTuning, setGenerationTuningState] = useState(() =>
+    normalizeGenerationTuning(prefs.generationTuning),
+  );
 
   const [baseImage, setBaseImage] = useState(null);
   const [displayImage, setDisplayImage] = useState(null);
@@ -145,7 +158,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   const batchCancelRef = useRef(false);
 
   const [variantStyles, setVariantStyles] = useState(() =>
-    getDefaultVariantStyles(prefs.style),
+    getDefaultVariantStyles(prefs.style, prefs.roomType),
   );
   const [activeVariants, setActiveVariants] = useState([]);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -186,6 +199,23 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
     (v) => {
       setRoomTypeState(v);
       setPref("roomType", v);
+      setStyleState((current) => {
+        const next = resolveStyleForRoom(current, v);
+        if (next !== current) setPref("style", next);
+        return next;
+      });
+      setVariantStyles((prev) => {
+        const next = [];
+        for (const id of prev) {
+          const resolved = resolveStyleForRoom(id, v);
+          if (!next.includes(resolved)) next.push(resolved);
+        }
+        for (const style of getStylesForRoomType(v)) {
+          if (next.length >= 3) break;
+          if (!next.includes(style.id)) next.push(style.id);
+        }
+        return next.slice(0, 3);
+      });
     },
     [setPref],
   );
@@ -222,6 +252,15 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
     (v) => {
       setDeepThinkingState(v);
       setPref("deepThinking", v);
+    },
+    [setPref],
+  );
+
+  const setGenerationTuning = useCallback(
+    (v) => {
+      const next = normalizeGenerationTuning(v);
+      setGenerationTuningState(next);
+      setPref("generationTuning", next);
     },
     [setPref],
   );
@@ -314,7 +353,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
         }
       } catch {
         if (!cancelled) {
-          setError("Impossible de charger l'historique.");
+          console.error("Impossible de charger l'historique.");
         }
       } finally {
         if (!cancelled) setHistoryLoading(false);
@@ -535,6 +574,9 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
           room_type: roomType,
           style: effectiveStyle,
           deep_thinking: deepThinking,
+          generation_tuning: hasFeature("generationTuning")
+            ? toApiGenerationTuning(generationTuning)
+            : null,
           room_sqm:
             mode === "meubler" &&
             roomSqm != null &&
@@ -576,6 +618,8 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
       roomSqm,
       style,
       deepThinking,
+      generationTuning,
+      hasFeature,
       getIdToken,
       refreshSubscription,
       activePropertyId,
@@ -1098,6 +1142,10 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
     deepThinkingLimit,
     deepThinkingRemaining,
     canUseDeepThinking,
+    generationTuning,
+    onGenerationTuningChange: setGenerationTuning,
+    canUseGenerationTuning: hasFeature("generationTuning"),
+    onUpgradeForTuning: () => openPaywall("pro_required"),
   };
 
   return (

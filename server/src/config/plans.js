@@ -26,6 +26,7 @@ export const PLANS = {
       "100 générations / mois",
       "50 réflexions approfondies / mois",
       "Tous les styles & pièces",
+      "Réglages IA avancés (fidélité / créativité)",
       "Support prioritaire",
     ],
   },
@@ -38,6 +39,7 @@ export const PLANS = {
     features: [
       "Générations illimitées",
       "Réflexion approfondie illimitée",
+      "Réglages IA avancés (fidélité / créativité)",
       "Usage multi-projets",
       "Historique complet",
       "Support dédié",

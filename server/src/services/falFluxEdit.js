@@ -1,6 +1,7 @@
 import { fal } from "@fal-ai/client";
 import { getFalConfig } from "../config.js";
 import { formatFalError } from "../utils/falErrors.js";
+import { resolveFalParams } from "./generationTuning.js";
 
 export async function uploadBuffer(buffer, mimeType) {
   const blob = new Blob([buffer], { type: mimeType });
@@ -19,13 +20,13 @@ function isObjectRemovalModel(model) {
   return model.includes("object-removal") && !isEditingModel(model);
 }
 
-export function buildFluxEditInput(model, imageUrl, prompt, deepThinking) {
+export function buildFluxEditInput(model, imageUrl, prompt, resolved) {
   if (isFluxEditModel(model)) {
     return {
       image_urls: [imageUrl],
       prompt,
-      guidance_scale: deepThinking ? 3 : 2.5,
-      num_inference_steps: deepThinking ? 40 : 28,
+      guidance_scale: resolved.guidance_scale,
+      num_inference_steps: resolved.num_inference_steps,
       enable_prompt_expansion: false,
       output_format: "jpeg",
     };
@@ -35,8 +36,8 @@ export function buildFluxEditInput(model, imageUrl, prompt, deepThinking) {
     return {
       image_url: imageUrl,
       prompt,
-      guidance_scale: deepThinking ? 4 : 3.5,
-      num_inference_steps: deepThinking ? 40 : 30,
+      guidance_scale: resolved.guidance_scale,
+      num_inference_steps: resolved.num_inference_steps,
       output_format: "jpeg",
     };
   }
@@ -46,16 +47,16 @@ export function buildFluxEditInput(model, imageUrl, prompt, deepThinking) {
       image_url: imageUrl,
       prompt: "all furniture, rugs, lamps, plants, and decorations",
       model: "best_quality",
-      mask_expansion: deepThinking ? 20 : 15,
+      mask_expansion: resolved.mask_expansion,
     };
   }
 
   return {
     image_url: imageUrl,
     prompt,
-    strength: deepThinking ? 0.7 : 0.65,
-    num_inference_steps: deepThinking ? 40 : 28,
-    guidance_scale: deepThinking ? 3.5 : 3,
+    strength: resolved.strength,
+    num_inference_steps: resolved.num_inference_steps,
+    guidance_scale: resolved.guidance_scale,
     output_format: "jpeg",
   };
 }
@@ -68,8 +69,10 @@ export async function runFluxEdit(
   prompt,
   model,
   deepThinking = false,
+  tuning = null,
 ) {
   const { key } = getFalConfig();
+  const resolved = resolveFalParams(tuning, deepThinking);
 
   if (!key) {
     const formatted = formatFalError(
@@ -86,7 +89,7 @@ export async function runFluxEdit(
     const imageUrl = await uploadBuffer(baseImageBuffer, "image/png");
 
     const result = await fal.subscribe(model, {
-      input: buildFluxEditInput(model, imageUrl, prompt, deepThinking),
+      input: buildFluxEditInput(model, imageUrl, prompt, resolved),
       logs: false,
     });
 

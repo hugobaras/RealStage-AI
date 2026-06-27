@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Columns2, SlidersHorizontal, ToggleLeft } from "lucide-react";
-import { STYLES } from "../constants/styles";
+import { getStyleById } from "../constants/styles";
 import { getModeTheme } from "../utils/modeTheme";
 import ImageCompareSlider from "./ImageCompareSlider";
 import VariantSwitcher from "./VariantSwitcher";
@@ -12,7 +12,7 @@ const VIEWS = [
 ];
 
 function getStyleLabel(styleId) {
-  return STYLES.find((s) => s.id === styleId)?.label ?? styleId;
+  return getStyleById(styleId)?.label ?? styleId;
 }
 
 function VariantGrid({ beforeImage, variants, mode }) {

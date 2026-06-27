@@ -10,8 +10,15 @@ export async function runReplace(
   style,
   roomType,
   deepThinking = false,
+  tuning = null,
 ) {
   const { replaceModel } = getFalConfig();
   const prompt = buildReplacePrompt(style, roomType);
-  return runFluxEdit(baseImageBuffer, prompt, replaceModel, deepThinking);
+  return runFluxEdit(
+    baseImageBuffer,
+    prompt,
+    replaceModel,
+    deepThinking,
+    tuning,
+  );
 }

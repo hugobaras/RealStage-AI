@@ -1,8 +1,21 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Sofa, Trash2, Building2, Store, CreditCard, ArrowLeftRight } from "lucide-react";
+import {
+  Sofa,
+  Trash2,
+  Building2,
+  Store,
+  CreditCard,
+  ArrowLeftRight,
+  Shield,
+} from "lucide-react";
 import { MODES } from "../constants/modes";
 import { useSubscription } from "../contexts/SubscriptionContext";
-import { getModeTheme } from "../utils/modeTheme";
+import { useAdmin } from "../contexts/AdminContext";
+import {
+  getModeTabTheme,
+  getModeTheme,
+  getSecondaryTabTheme,
+} from "../utils/modeTheme";
 import ThemeToggle from "./ThemeToggle";
 
 export const NAV_ITEMS = [
@@ -40,7 +53,7 @@ function secondaryIsActive(pathname, to) {
 
 function ModeNavButton({ id, icon: Icon, active, onClick }) {
   const config = MODES[id];
-  const theme = getModeTheme(id);
+  const tabTheme = getModeTabTheme(id);
   const navLabel = config.navLabel ?? config.label;
 
   return (
@@ -49,7 +62,7 @@ function ModeNavButton({ id, icon: Icon, active, onClick }) {
       onClick={() => onClick(id)}
       className={`group relative flex flex-col items-center gap-1 rounded-xl px-1.5 py-2.5 transition-all ${
         active
-          ? `${theme.bgSubtle} ${theme.text} ring-1 ${theme.border} ${theme.shadow}`
+          ? `${tabTheme.bgSubtle} ${tabTheme.text} ring-1 ${tabTheme.border} ${tabTheme.shadow}`
           : "text-fg-subtle hover:bg-elevated/80 hover:text-fg"
       }`}
       title={config.label}
@@ -58,7 +71,7 @@ function ModeNavButton({ id, icon: Icon, active, onClick }) {
     >
       {active && (
         <span
-          className={`absolute -left-2 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full ${theme.navIndicator}`}
+          className={`absolute -left-2 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full ${tabTheme.navIndicator}`}
         />
       )}
       <Icon
@@ -75,6 +88,7 @@ function ModeNavButton({ id, icon: Icon, active, onClick }) {
 export default function Sidebar({ activeMode, onModeChange }) {
   const activeTheme = getModeTheme(activeMode);
   const { hasFeature } = useSubscription();
+  const { isAdmin } = useAdmin();
   const location = useLocation();
   const navigate = useNavigate();
   const isEditor =
@@ -130,6 +144,7 @@ export default function Sidebar({ activeMode, onModeChange }) {
           (item) => !item.feature || hasFeature(item.feature),
         ).map(({ id, to, icon: Icon, label }) => {
           const active = secondaryIsActive(location.pathname, to);
+          const tabTheme = getSecondaryTabTheme(id);
 
           return (
             <NavLink
@@ -137,13 +152,15 @@ export default function Sidebar({ activeMode, onModeChange }) {
               to={to}
               className={`relative flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 transition ${
                 active
-                  ? "bg-accent/15 text-accent-light ring-1 ring-accent/30"
+                  ? `${tabTheme.bgSubtle} ${tabTheme.text} ring-1 ${tabTheme.border}`
                   : "text-fg-subtle hover:bg-elevated/80 hover:text-fg"
               }`}
               title={label}
             >
               {active && (
-                <span className="absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-accent-light" />
+                <span
+                  className={`absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full ${tabTheme.navIndicator}`}
+                />
               )}
               <Icon className="h-5 w-5" />
               <span className="max-w-full truncate text-center text-[10px] font-semibold leading-tight">
@@ -152,6 +169,22 @@ export default function Sidebar({ activeMode, onModeChange }) {
             </NavLink>
           );
         })}
+        {isAdmin && (
+          <NavLink
+            to="/admin"
+            className={`relative flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 transition ${
+              location.pathname.startsWith("/admin")
+                ? "bg-violet-500/15 text-violet-300 ring-1 ring-violet-500/30"
+                : "text-fg-subtle hover:bg-elevated/80 hover:text-fg"
+            }`}
+            title="Administration"
+          >
+            <Shield className="h-5 w-5" />
+            <span className="max-w-full truncate text-center text-[10px] font-semibold leading-tight">
+              Admin
+            </span>
+          </NavLink>
+        )}
       </div>
     </aside>
   );

@@ -1,8 +1,9 @@
-import { STYLES } from "../constants/styles";
+import { getStylesForRoomType, resolveStyleForRoom } from "../constants/styles";
+import { isOutdoorRoomType } from "../constants/roomTypes";
 import { getModeTheme } from "../utils/modeTheme";
 import { isStyleMode } from "../constants/modes";
 
-const POPULAR_STYLE_IDS = [
+const INTERIOR_POPULAR_IDS = [
   "moderne",
   "scandinave",
   "mid_century",
@@ -11,10 +12,18 @@ const POPULAR_STYLE_IDS = [
   "japandi",
 ];
 
-const POPULAR_STYLES = STYLES.filter((s) => POPULAR_STYLE_IDS.includes(s.id));
+const OUTDOOR_POPULAR_IDS = [
+  "terrasse_moderne",
+  "villa_mediterraneen",
+  "jardin_scandinave",
+  "bord_de_mer",
+  "luxe_piscine",
+  "patio_contemporain",
+];
 
 export default function VariantPicker({
   mode,
+  roomType,
   currentStyle,
   selectedStyles,
   onChange,
@@ -22,6 +31,13 @@ export default function VariantPicker({
   embedded = false,
 }) {
   const theme = getModeTheme(mode);
+  const availableStyles = getStylesForRoomType(roomType);
+  const popularIds = isOutdoorRoomType(roomType)
+    ? OUTDOOR_POPULAR_IDS
+    : INTERIOR_POPULAR_IDS;
+  const popularStyles = availableStyles.filter((s) =>
+    popularIds.includes(s.id),
+  );
 
   if (!isStyleMode(mode)) return null;
 
@@ -47,7 +63,7 @@ export default function VariantPicker({
         </div>
       )}
       <div className="flex flex-wrap gap-1.5">
-        {POPULAR_STYLES.map((s) => {
+        {popularStyles.map((s) => {
           const selected = selectedStyles.includes(s.id);
           const atMax = selectedStyles.length >= 3 && !selected;
           return (
@@ -81,12 +97,13 @@ export default function VariantPicker({
   return <div className="surface-card space-y-2.5 p-3.5">{content}</div>;
 }
 
-export function getDefaultVariantStyles(currentStyle) {
-  const defaults = [currentStyle, "scandinave", "mid_century"].filter(
-    (id, i, arr) => arr.indexOf(id) === i,
-  );
-  if (defaults.length < 2) {
-    defaults.push("moderne");
+export function getDefaultVariantStyles(currentStyle, roomType = "salon") {
+  const pool = getStylesForRoomType(roomType);
+  const resolved = resolveStyleForRoom(currentStyle, roomType);
+  const defaults = [resolved];
+  for (const style of pool) {
+    if (defaults.length >= 3) break;
+    if (!defaults.includes(style.id)) defaults.push(style.id);
   }
   return defaults.slice(0, 3);
 }

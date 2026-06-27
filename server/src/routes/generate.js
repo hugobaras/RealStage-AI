@@ -6,6 +6,7 @@ import {
   buildDeclutterPrompt,
   buildReplacePrompt,
   isValidStyle,
+  isValidStyleForRoom,
   isValidRoomType,
   isValidRoomSqm,
 } from "../services/promptBuilder.js";
@@ -22,6 +23,8 @@ import {
 } from "../services/subscriptionService.js";
 import { assertPropertyOwned } from "../services/propertyStore.js";
 import { assertPlan, PlanError } from "../middleware/requirePlan.js";
+import { normalizeGenerationTuning } from "../services/generationTuning.js";
+import { ensureConfigCache } from "../services/configStore.js";
 
 const router = Router();
 
@@ -33,6 +36,8 @@ function needsStyle(mode) {
 
 router.post("/generate", requireAuth, async (req, res, next) => {
   try {
+    await ensureConfigCache();
+
     const {
       base_image,
       mode = "meubler",
@@ -43,6 +48,7 @@ router.post("/generate", requireAuth, async (req, res, next) => {
       variant_group_id,
       variant_index,
       property_id,
+      generation_tuning,
     } = req.body;
 
     if (!base_image) {
@@ -70,13 +76,29 @@ router.post("/generate", requireAuth, async (req, res, next) => {
     const parsedSqm =
       room_sqm != null && room_sqm !== "" ? Number(room_sqm) : null;
 
-    if (needsStyle(mode) && (!style || !isValidStyle(style))) {
+    if (
+      needsStyle(mode) &&
+      (!style || !isValidStyleForRoom(style, room_type))
+    ) {
       return res.status(400).json({
-        error: "Invalid style.",
+        error: "Invalid style for this room type.",
       });
     }
 
     const deepThinking = Boolean(deep_thinking);
+
+    let generationTuning = null;
+    if (generation_tuning != null && typeof generation_tuning === "object") {
+      if (req.user?.uid) {
+        await assertPlan(req.user.uid, "pro");
+      }
+      generationTuning = normalizeGenerationTuning(generation_tuning);
+      if (!generationTuning) {
+        return res.status(400).json({
+          error: "Invalid generation_tuning. Use values between 0 and 100.",
+        });
+      }
+    }
 
     if (req.user?.uid) {
       await assertCanGenerate(req.user.uid);
@@ -99,7 +121,12 @@ router.post("/generate", requireAuth, async (req, res, next) => {
 
     if (mode === "desencombrer") {
       prompt = buildDeclutterPrompt(room_type);
-      falImageUrl = await runDeclutter(baseBuffer, room_type, deepThinking);
+      falImageUrl = await runDeclutter(
+        baseBuffer,
+        room_type,
+        deepThinking,
+        generationTuning,
+      );
     } else if (mode === "remplacer") {
       prompt = buildReplacePrompt(style, room_type);
       falImageUrl = await runReplace(
@@ -107,10 +134,16 @@ router.post("/generate", requireAuth, async (req, res, next) => {
         style,
         room_type,
         deepThinking,
+        generationTuning,
       );
     } else {
       prompt = buildPrompt(style, room_type, parsedSqm);
-      falImageUrl = await runStaging(baseBuffer, prompt, deepThinking);
+      falImageUrl = await runStaging(
+        baseBuffer,
+        prompt,
+        deepThinking,
+        generationTuning,
+      );
     }
 
     let generation = null;

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { isValidReportReason } from "../constants/reportReasons.js";
 import { getGeneration } from "../services/generationStore.js";
+import { createReport } from "../services/reportStore.js";
 import {
   isEmailConfigured,
   sendGenerationReportEmail,
@@ -15,13 +16,6 @@ router.post("/reports/generation", requireAuth, async (req, res, next) => {
   try {
     if (!isFirebaseConfigured() || !req.user?.uid) {
       return res.status(503).json({ error: "Historique non disponible." });
-    }
-
-    if (!isEmailConfigured()) {
-      return res.status(503).json({
-        error:
-          "L'envoi de signalements par e-mail n'est pas configuré sur le serveur.",
-      });
     }
 
     const { generation_id: generationId, reason, comment } = req.body ?? {};
@@ -50,14 +44,33 @@ router.post("/reports/generation", requireAuth, async (req, res, next) => {
 
     const generation = await getGeneration(req.user.uid, generationId);
 
-    await sendGenerationReportEmail({
-      user: req.user,
-      generation,
+    const report = await createReport({
+      generationId,
+      userId: req.user.uid,
+      userEmail: req.user.email,
       reason,
       comment: trimmedComment || null,
+      generationMeta: {
+        mode: generation.mode ?? null,
+        roomType: generation.roomType ?? null,
+        style: generation.style ?? null,
+      },
     });
 
-    res.json({ ok: true });
+    if (isEmailConfigured()) {
+      try {
+        await sendGenerationReportEmail({
+          user: req.user,
+          generation,
+          reason,
+          comment: trimmedComment || null,
+        });
+      } catch (emailErr) {
+        console.error("Envoi e-mail signalement échoué:", emailErr);
+      }
+    }
+
+    res.json({ ok: true, reportId: report.id });
   } catch (err) {
     if (err.status === 404) {
       return res.status(404).json({ error: err.message });

@@ -17,6 +17,7 @@ export async function generateImage(payload, idToken) {
       variant_group_id: payload.variant_group_id ?? null,
       variant_index: payload.variant_index ?? null,
       property_id: payload.property_id ?? null,
+      generation_tuning: payload.generation_tuning ?? null,
     }),
   });
 

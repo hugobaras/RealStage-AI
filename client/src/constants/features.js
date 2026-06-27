@@ -5,6 +5,7 @@ export const FEATURES = {
   agencyPresets: { minPlan: "agence", exact: true },
   listingWorkflow: { minPlan: "pro", exact: false },
   variantCompare: { minPlan: "pro", exact: false },
+  generationTuning: { minPlan: "pro", exact: false },
 };
 
 export function getPlanRank(planId) {

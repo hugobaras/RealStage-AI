@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { formatGenerationsLimit, TRIAL_LIMIT } from "../constants/plans";
 import { useAuth } from "../contexts/AuthContext";
+import { useAdmin } from "../contexts/AdminContext";
 import { useSubscription } from "../contexts/SubscriptionContext";
 import { usePreferences } from "../hooks/usePreferences";
 import AppShell from "./AppShell";
@@ -56,6 +57,7 @@ function providerLabel(user) {
 
 export default function UserSettingsPage() {
   const { user, logout, updateDisplayName, changePassword } = useAuth();
+  const { isAdmin } = useAdmin();
   const { prefs, setPref } = usePreferences();
   const {
     plan,
@@ -458,6 +460,22 @@ export default function UserSettingsPage() {
               >
                 <Building className="h-4 w-4" />
                 Ouvrir les paramètres agence
+              </Link>
+            </SettingsSection>
+          )}
+
+          {isAdmin && (
+            <SettingsSection
+              icon={Shield}
+              title="Administration"
+              description="Gestion de la plateforme RealStage AI."
+            >
+              <Link
+                to="/admin"
+                className="btn-secondary inline-flex items-center gap-2 text-sm"
+              >
+                <Shield className="h-4 w-4" />
+                Ouvrir le panneau admin
               </Link>
             </SettingsSection>
           )}

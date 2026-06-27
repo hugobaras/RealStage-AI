@@ -1,8 +1,8 @@
-import { STYLES } from "../constants/styles";
+import { getStyleById } from "../constants/styles";
 import { getModeTheme } from "../utils/modeTheme";
 
 function getStyleLabel(styleId) {
-  return STYLES.find((s) => s.id === styleId)?.label ?? styleId;
+  return getStyleById(styleId)?.label ?? styleId;
 }
 
 export default function VariantSwitcher({

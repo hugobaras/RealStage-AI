@@ -292,12 +292,12 @@
     background-image:
       radial-gradient(
         ellipse 90% 60% at 0% 0%,
-        rgba(90, 122, 143, 0.14),
+        rgba(186, 178, 168, 0.14),
         transparent 55%
       ),
       radial-gradient(
         ellipse 70% 50% at 100% 100%,
-        rgba(61, 90, 110, 0.08),
+        rgba(156, 147, 137, 0.08),
         transparent 50%
       );
   }
@@ -306,12 +306,12 @@
     background-image:
       radial-gradient(
         ellipse 90% 60% at 0% 0%,
-        rgba(90, 122, 143, 0.08),
+        rgba(186, 178, 168, 0.09),
         transparent 55%
       ),
       radial-gradient(
         ellipse 70% 50% at 100% 100%,
-        rgba(61, 90, 110, 0.05),
+        rgba(156, 147, 137, 0.05),
         transparent 50%
       );
   }
@@ -344,18 +344,18 @@
       0 0 60px rgba(166, 148, 130, 0.07);
   }
 
-  .canvas-frame-blue {
+  .canvas-frame-stone-cool {
     box-shadow:
       0 0 0 1px rgba(var(--c-inset-shadow), 0.04) inset,
       0 20px 60px rgba(0, 0, 0, 0.5),
-      0 0 80px rgba(61, 90, 110, 0.1);
+      0 0 80px rgba(156, 147, 137, 0.1);
   }
 
-  [data-theme="light"] .canvas-frame-blue {
+  [data-theme="light"] .canvas-frame-stone-cool {
     box-shadow:
       0 0 0 1px rgba(0, 0, 0, 0.06) inset,
       0 12px 40px rgba(28, 43, 58, 0.1),
-      0 0 60px rgba(61, 90, 110, 0.07);
+      0 0 60px rgba(156, 147, 137, 0.07);
   }
 
   .canvas-frame {
@@ -418,25 +418,25 @@
     }
   }
 
-  .drop-zone-prominent-blue {
-    @apply relative rounded-2xl border-2 border-dashed border-estate-blue/50 bg-estate-blue/5;
-    animation: drop-zone-pulse-blue 2.5s ease-in-out infinite;
+  .drop-zone-prominent-stone-cool {
+    @apply relative rounded-2xl border-2 border-dashed border-estate-stone-cool/50 bg-estate-stone-cool/5;
+    animation: drop-zone-pulse-stone-cool 2.5s ease-in-out infinite;
   }
 
-  .drop-zone-prominent-blue:hover {
-    @apply border-estate-blue bg-estate-blue/10;
+  .drop-zone-prominent-stone-cool:hover {
+    @apply border-estate-stone-cool bg-estate-stone-cool/10;
     animation: none;
   }
 
-  @keyframes drop-zone-pulse-blue {
+  @keyframes drop-zone-pulse-stone-cool {
     0%,
     100% {
-      border-color: rgba(61, 90, 110, 0.35);
-      box-shadow: 0 0 0 0 rgba(61, 90, 110, 0.15);
+      border-color: rgba(156, 147, 137, 0.35);
+      box-shadow: 0 0 0 0 rgba(156, 147, 137, 0.15);
     }
     50% {
-      border-color: rgba(90, 122, 143, 0.55);
-      box-shadow: 0 0 32px rgba(61, 90, 110, 0.2);
+      border-color: rgba(186, 178, 168, 0.55);
+      box-shadow: 0 0 32px rgba(156, 147, 137, 0.2);
     }
   }
 
@@ -511,19 +511,19 @@
     animation: shimmer 2s linear infinite;
   }
 
-  .btn-shimmer-blue {
+  .btn-shimmer-stone-cool {
     background-size: 200% auto;
     background-image: linear-gradient(
       90deg,
-      #3d5a6e 0%,
-      #5a7a8f 25%,
-      #3d5a6e 50%,
-      #2c4454 75%,
-      #3d5a6e 100%
+      #9c9389 0%,
+      #bab2a8 25%,
+      #9c9389 50%,
+      #7a736c 75%,
+      #9c9389 100%
     );
   }
 
-  .btn-shimmer-blue:hover {
+  .btn-shimmer-stone-cool:hover {
     animation: shimmer 2s linear infinite;
   }
 
@@ -532,7 +532,7 @@
   }
 
   [data-mode="remplacer"] .input-field:focus {
-    @apply border-estate-blue ring-2 ring-estate-blue/20;
+    @apply border-estate-stone-cool ring-2 ring-estate-stone-cool/20;
   }
 
   .text-gradient-animated {
@@ -649,9 +649,9 @@
   }
 
   .landing-page .btn-estate-primary:hover {
-    background-color: #3d5a6e;
+    background-color: #857566;
     color: #fff;
-    box-shadow: 0 10px 15px -3px rgba(61, 90, 110, 0.25);
+    box-shadow: 0 10px 15px -3px rgba(133, 117, 102, 0.25);
     transform: scale(1.02);
   }
 
@@ -776,32 +776,43 @@
   }
 
   [data-theme="light"] .app-themed .text-estate-stone-light {
-    color: #556b4a;
+    color: #857566;
   }
 
-  [data-theme="light"] .app-themed .text-estate-blue-light {
-    color: #163d54;
+  [data-theme="light"] .app-themed .text-estate-stone-warm-light {
+    color: #877568;
+  }
+
+  [data-theme="light"] .app-themed .text-estate-stone-cool-light {
+    color: #7a736c;
   }
 
   [data-theme="light"]
     .app-themed
     [class*="border-estate-stone"][class*="bg-estate-stone"] {
-    color: #556b4a;
+    color: #857566;
   }
 
   [data-theme="light"]
     .app-themed
-    [class*="border-estate-blue"][class*="bg-estate-blue"] {
-    color: #163d54;
+    [class*="border-estate-stone-warm"][class*="bg-estate-stone-warm"] {
+    color: #877568;
+  }
+
+  [data-theme="light"]
+    .app-themed
+    [class*="border-estate-stone-cool"][class*="bg-estate-stone-cool"] {
+    color: #7a736c;
   }
 
   /* Keep white text on solid colored surfaces only */
   [data-theme="light"] .app-themed .btn-primary,
   [data-theme="light"] .app-themed .btn-shimmer,
   [data-theme="light"] .app-themed .btn-shimmer-stone,
-  [data-theme="light"] .app-themed .btn-shimmer-blue,
+  [data-theme="light"] .app-themed .btn-shimmer-stone-cool,
   [data-theme="light"] .app-themed .bg-estate-stone,
-  [data-theme="light"] .app-themed .bg-estate-blue,
+  [data-theme="light"] .app-themed .bg-estate-stone-warm,
+  [data-theme="light"] .app-themed .bg-estate-stone-cool,
   [data-theme="light"] .app-themed .bg-accent,
   [data-theme="light"] .app-themed [class*="bg-red-"] {
     color: #fff !important;

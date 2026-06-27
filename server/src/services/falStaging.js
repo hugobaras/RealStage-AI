@@ -1,6 +1,7 @@
 import { fal } from "@fal-ai/client";
 import { getFalConfig } from "../config.js";
 import { formatFalError } from "../utils/falErrors.js";
+import { resolveFalParams } from "./generationTuning.js";
 
 async function uploadBuffer(buffer, mimeType) {
   const blob = new Blob([buffer], { type: mimeType });
@@ -11,14 +12,14 @@ function isApartmentStagingModel(model) {
   return model.includes("apartment-staging");
 }
 
-function buildModelInput(model, imageUrl, prompt, deepThinking) {
+export function buildModelInput(model, imageUrl, prompt, resolved) {
   if (isApartmentStagingModel(model)) {
     return {
       prompt,
       image_urls: [imageUrl],
-      lora_scale: deepThinking ? 1.2 : 1,
-      num_inference_steps: deepThinking ? 40 : 28,
-      guidance_scale: 2.5,
+      lora_scale: resolved.lora_scale,
+      num_inference_steps: resolved.num_inference_steps,
+      guidance_scale: resolved.guidance_scale,
       output_format: "jpeg",
     };
   }
@@ -26,9 +27,9 @@ function buildModelInput(model, imageUrl, prompt, deepThinking) {
   return {
     prompt,
     image_url: imageUrl,
-    strength: deepThinking ? 0.82 : 0.75,
-    num_inference_steps: deepThinking ? 40 : 28,
-    guidance_scale: deepThinking ? 4 : 3.5,
+    strength: resolved.strength,
+    num_inference_steps: resolved.num_inference_steps,
+    guidance_scale: resolved.guidance_scale,
     output_format: "jpeg",
   };
 }
@@ -40,8 +41,10 @@ export async function runStaging(
   baseImageBuffer,
   prompt,
   deepThinking = false,
+  tuning = null,
 ) {
   const { key, model } = getFalConfig();
+  const resolved = resolveFalParams(tuning, deepThinking);
 
   if (!key) {
     const formatted = formatFalError(
@@ -57,7 +60,7 @@ export async function runStaging(
   try {
     const imageUrl = await uploadBuffer(baseImageBuffer, "image/png");
     const result = await fal.subscribe(model, {
-      input: buildModelInput(model, imageUrl, prompt, deepThinking),
+      input: buildModelInput(model, imageUrl, prompt, resolved),
       logs: false,
     });
 

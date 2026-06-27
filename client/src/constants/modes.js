@@ -26,11 +26,11 @@ export const MODES = {
     generateLabel: "Remplacer",
     loadingLabel: "Remplacement IA en cours…",
     theme: {
-      accent: "estate-blue",
-      bar: "from-estate-blue/20 via-estate-blue/5 to-transparent",
-      border: "border-estate-blue/50",
-      glow: "shadow-estate-blue/25",
-      pill: "bg-estate-blue",
+      accent: "estate-stone-cool",
+      bar: "from-estate-stone-cool/20 via-estate-stone-cool/5 to-transparent",
+      border: "border-estate-stone-cool/50",
+      glow: "shadow-estate-stone-cool/25",
+      pill: "bg-estate-stone-cool",
     },
   },
   desencombrer: {

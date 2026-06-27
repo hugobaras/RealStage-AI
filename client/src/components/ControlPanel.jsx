@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import {
   Zap,
   ChevronDown,
@@ -12,11 +12,17 @@ import {
   Layers,
   X,
 } from "lucide-react";
-import { STYLES } from "../constants/styles";
-import { ROOM_TYPES } from "../constants/roomTypes";
+import {
+  STYLES,
+  getStylesForRoomType,
+  getStyleCategoryOrder,
+  getStyleById,
+} from "../constants/styles";
+import { ROOM_TYPES, ROOM_CATEGORY_ORDER } from "../constants/roomTypes";
 import { getTypicalSqm, SQM_PRESETS } from "../constants/roomTypicalSqm";
 import SearchableSelect from "./SearchableSelect";
 import VariantPicker from "./VariantPicker";
+import GenerationTuningPanel from "./GenerationTuningPanel";
 import { getModeTheme } from "../utils/modeTheme";
 import { isStyleMode } from "../constants/modes";
 
@@ -221,38 +227,6 @@ function RoomSqmField({ value, roomType, onChange, disabled, theme }) {
   );
 }
 
-function StyleSelect({ value, onChange, disabled }) {
-  const selected = STYLES.find((s) => s.id === value) ?? STYLES[0];
-
-  return (
-    <div>
-      <label className="section-label mb-2 block">Nouveau style</label>
-      <div className="relative">
-        <div className="pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
-          <img
-            src={selected.previewImage}
-            alt=""
-            className="h-8 w-10 rounded-lg object-cover ring-1 ring-white/10"
-          />
-        </div>
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          className="input-field appearance-none py-2.5 pl-16 pr-10 disabled:opacity-40"
-        >
-          {STYLES.map((style) => (
-            <option key={style.id} value={style.id}>
-              {style.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted" />
-      </div>
-    </div>
-  );
-}
-
 function AdjustmentSlider({
   label,
   icon: Icon,
@@ -335,10 +309,22 @@ export default function ControlPanel({
   deepThinkingLimit,
   deepThinkingRemaining,
   canUseDeepThinking,
+  generationTuning,
+  onGenerationTuningChange,
+  canUseGenerationTuning,
+  onUpgradeForTuning,
 }) {
   const isDeclutter = mode === "desencombrer";
   const showStyleOptions = isStyleMode(mode);
   const theme = getModeTheme(mode);
+  const styleOptions = useMemo(
+    () => getStylesForRoomType(roomType),
+    [roomType],
+  );
+  const styleCategoryOrder = useMemo(
+    () => getStyleCategoryOrder(roomType),
+    [roomType],
+  );
 
   const handleGenerateClick = () => {
     if (!baseImage || loading) return;
@@ -446,10 +432,15 @@ export default function ControlPanel({
         />
 
         {!isDeclutter && showStyleOptions && (
-          <StyleSelect
+          <SearchableSelect
+            label="Nouveau style"
             value={style}
+            options={styleOptions}
+            categoryOrder={styleCategoryOrder}
+            resolveOption={getStyleById}
             onChange={onStyleChange}
             disabled={loading}
+            theme={theme}
           />
         )}
 
@@ -457,6 +448,7 @@ export default function ControlPanel({
           label="De quelle pièce s'agit-il ?"
           value={roomType}
           options={ROOM_TYPES}
+          categoryOrder={ROOM_CATEGORY_ORDER}
           onChange={onRoomTypeChange}
           disabled={loading}
           theme={theme}
@@ -470,6 +462,7 @@ export default function ControlPanel({
           >
             <VariantPicker
               mode={mode}
+              roomType={roomType}
               currentStyle={style}
               selectedStyles={variantStyles}
               onChange={onVariantStylesChange}
@@ -531,6 +524,25 @@ export default function ControlPanel({
             />
           </label>
         </div>
+
+        <CollapsibleSection
+          title="Réglages IA avancés"
+          hint={
+            canUseGenerationTuning
+              ? "Fidélité, précision du prompt, niveau de détail"
+              : "Réservé Pro & Agence"
+          }
+          theme={theme}
+        >
+          <GenerationTuningPanel
+            value={generationTuning}
+            onChange={onGenerationTuningChange}
+            disabled={loading}
+            theme={theme}
+            locked={!canUseGenerationTuning}
+            onUpgradeClick={onUpgradeForTuning}
+          />
+        </CollapsibleSection>
       </div>
 
       {error && (

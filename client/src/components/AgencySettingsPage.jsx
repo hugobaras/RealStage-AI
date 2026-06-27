@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Image as ImageIcon } from "lucide-react";
-import { STYLES } from "../constants/styles";
+import { INTERIOR_STYLES } from "../constants/styles";
 import { DEFAULT_AGENCY_TYPOGRAPHY } from "../constants/agencyTypography";
 import { useAgencySettings } from "../hooks/useAgencySettings";
 import { useSubscription } from "../contexts/SubscriptionContext";
@@ -209,7 +209,7 @@ export default function AgencySettingsPage() {
                 onChange={(e) => handleChange("defaultStyle", e.target.value)}
                 className="input-field"
               >
-                {STYLES.map((s) => (
+                {INTERIOR_STYLES.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.label}
                   </option>

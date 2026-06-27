@@ -27,7 +27,8 @@ const STONE_THEME = {
     "peer-checked:bg-estate-stone peer-checked:after:translate-x-full",
   slider: "accent-estate-stone",
   dropZone: "drop-zone-prominent-stone",
-  dropZoneIcon: "bg-estate-stone/20 ring-estate-stone/30 text-estate-stone-light",
+  dropZoneIcon:
+    "bg-estate-stone/20 ring-estate-stone/30 text-estate-stone-light",
   dropZoneCta: "bg-estate-stone shadow-estate-stone/30",
   navActive: "text-estate-stone-light",
   navIndicator: "bg-estate-stone-light",
@@ -48,74 +49,76 @@ const STONE_THEME = {
   bannerIcon: "text-estate-stone-light",
   bannerLink:
     "border-estate-stone/30 text-estate-stone-light hover:bg-estate-stone/10",
-  bannerCta: "bg-estate-stone shadow-lg shadow-estate-stone/20 hover:opacity-90",
+  bannerCta:
+    "bg-estate-stone shadow-lg shadow-estate-stone/20 hover:opacity-90",
   badgeSubscribed:
     "border-estate-stone/30 bg-estate-stone/15 text-estate-stone-light",
-  pricingLinkHover: "hover:border-estate-stone/40 hover:text-estate-stone-light",
+  pricingLinkHover:
+    "hover:border-estate-stone/40 hover:text-estate-stone-light",
   modalPrimary:
     "btn-shimmer-stone rounded-xl bg-estate-stone py-2.5 text-sm font-semibold text-white shadow-lg shadow-estate-stone/30 transition hover:bg-estate-stone-dark disabled:cursor-not-allowed disabled:opacity-50",
   logoActive:
     "bg-estate-stone/20 shadow-lg shadow-estate-stone/30 ring-1 ring-estate-stone/40",
 };
 
-const BLUE_THEME = {
-  text: "text-estate-blue-light",
-  textLight: "text-estate-blue-light",
-  bg: "bg-estate-blue",
-  bgHover: "hover:bg-estate-blue-dark",
-  bgSubtle: "bg-estate-blue/10",
-  bgMedium: "bg-estate-blue/20",
-  border: "border-estate-blue/40",
-  borderSubtle: "border-estate-blue/20",
-  ring: "ring-estate-blue/30",
-  shadow: "shadow-estate-blue/30",
-  shadowLg: "shadow-lg shadow-estate-blue/30",
-  gradientBar: "from-estate-blue/20 via-estate-blue/5 to-transparent",
-  barBorder: "border-estate-blue/20",
-  accentBar: "bg-estate-blue",
-  headerBorder: "border-estate-blue/20",
-  headerAccent: "bg-estate-blue",
+const STONE_COOL_THEME = {
+  text: "text-estate-stone-cool-light",
+  textLight: "text-estate-stone-cool-light",
+  bg: "bg-estate-stone-cool",
+  bgHover: "hover:bg-estate-stone-cool-dark",
+  bgSubtle: "bg-estate-stone-cool/10",
+  bgMedium: "bg-estate-stone-cool/20",
+  border: "border-estate-stone-cool/40",
+  borderSubtle: "border-estate-stone-cool/20",
+  ring: "ring-estate-stone-cool/30",
+  shadow: "shadow-estate-stone-cool/30",
+  shadowLg: "shadow-lg shadow-estate-stone-cool/30",
+  gradientBar: "from-estate-stone-cool/20 via-estate-stone-cool/5 to-transparent",
+  barBorder: "border-estate-stone-cool/20",
+  accentBar: "bg-estate-stone-cool",
+  headerBorder: "border-estate-stone-cool/20",
+  headerAccent: "bg-estate-stone-cool",
   headerIcon:
-    "bg-estate-blue/20 text-estate-blue-light ring-1 ring-estate-blue/40",
-  workflowGradientEnd: "to-estate-blue/5",
+    "bg-estate-stone-cool/20 text-estate-stone-cool-light ring-1 ring-estate-stone-cool/40",
+  workflowGradientEnd: "to-estate-stone-cool/5",
   appBg: "app-bg-replace",
   btnPrimary:
-    "rounded-xl bg-estate-blue py-2.5 text-sm font-semibold text-white shadow-lg shadow-estate-blue/30 transition hover:bg-estate-blue-dark disabled:cursor-not-allowed disabled:opacity-50",
+    "rounded-xl bg-estate-stone-cool py-2.5 text-sm font-semibold text-white shadow-lg shadow-estate-stone-cool/30 transition hover:bg-estate-stone-cool-dark disabled:cursor-not-allowed disabled:opacity-50",
   btnPrimaryLg:
-    "btn-shimmer-blue w-full rounded-xl bg-estate-blue py-4 text-base font-bold text-white shadow-xl shadow-estate-blue/30 hover:bg-estate-blue-dark",
+    "btn-shimmer-stone-cool w-full rounded-xl bg-estate-stone-cool py-4 text-base font-bold text-white shadow-xl shadow-estate-stone-cool/30 hover:bg-estate-stone-cool-dark",
   peerChecked:
-    "peer-checked:bg-estate-blue peer-checked:after:translate-x-full",
-  slider: "accent-estate-blue",
-  dropZone: "drop-zone-prominent-blue",
-  dropZoneIcon: "bg-estate-blue/20 ring-estate-blue/30 text-estate-blue-light",
-  dropZoneCta: "bg-estate-blue shadow-estate-blue/30",
-  navActive: "text-estate-blue-light",
-  navIndicator: "bg-estate-blue-light",
+    "peer-checked:bg-estate-stone-cool peer-checked:after:translate-x-full",
+  slider: "accent-estate-stone-cool",
+  dropZone: "drop-zone-prominent-stone-cool",
+  dropZoneIcon: "bg-estate-stone-cool/20 ring-estate-stone-cool/30 text-estate-stone-cool-light",
+  dropZoneCta: "bg-estate-stone-cool shadow-estate-stone-cool/30",
+  navActive: "text-estate-stone-cool-light",
+  navIndicator: "bg-estate-stone-cool-light",
   selected:
-    "border-estate-blue/60 shadow-lg shadow-estate-blue/10 ring-1 ring-estate-blue/30",
-  hoverBorder: "hover:border-estate-blue/40",
-  hoverAction: "hover:bg-estate-blue",
-  selectActive: "bg-estate-blue/15 text-estate-blue-light",
-  deepThinkingCard: "border-estate-blue/20 bg-estate-blue/5",
-  resultCard: "border-estate-blue/30 bg-estate-blue/5",
-  resultText: "text-estate-blue-light",
-  icon: "text-estate-blue-light",
-  canvasFrame: "canvas-frame canvas-frame-blue",
+    "border-estate-stone-cool/60 shadow-lg shadow-estate-stone-cool/10 ring-1 ring-estate-stone-cool/30",
+  hoverBorder: "hover:border-estate-stone-cool/40",
+  hoverAction: "hover:bg-estate-stone-cool",
+  selectActive: "bg-estate-stone-cool/15 text-estate-stone-cool-light",
+  deepThinkingCard: "border-estate-stone-cool/20 bg-estate-stone-cool/5",
+  resultCard: "border-estate-stone-cool/30 bg-estate-stone-cool/5",
+  resultText: "text-estate-stone-cool-light",
+  icon: "text-estate-stone-cool-light",
+  canvasFrame: "canvas-frame canvas-frame-stone-cool",
   chainBtn:
-    "border-estate-blue/50 bg-estate-blue/15 text-estate-blue-light hover:bg-estate-blue/25",
+    "border-estate-stone-cool/50 bg-estate-stone-cool/15 text-estate-stone-cool-light hover:bg-estate-stone-cool/25",
   bannerRow:
-    "border-estate-blue/20 bg-gradient-to-r from-estate-blue/10 to-transparent",
-  bannerIcon: "text-estate-blue-light",
+    "border-estate-stone-cool/20 bg-gradient-to-r from-estate-stone-cool/10 to-transparent",
+  bannerIcon: "text-estate-stone-cool-light",
   bannerLink:
-    "border-estate-blue/30 text-estate-blue-light hover:bg-estate-blue/10",
-  bannerCta: "bg-estate-blue shadow-lg shadow-estate-blue/20 hover:opacity-90",
+    "border-estate-stone-cool/30 text-estate-stone-cool-light hover:bg-estate-stone-cool/10",
+  bannerCta: "bg-estate-stone-cool shadow-lg shadow-estate-stone-cool/20 hover:opacity-90",
   badgeSubscribed:
-    "border-estate-blue/30 bg-estate-blue/15 text-estate-blue-light",
-  pricingLinkHover: "hover:border-estate-blue/40 hover:text-estate-blue-light",
+    "border-estate-stone-cool/30 bg-estate-stone-cool/15 text-estate-stone-cool-light",
+  pricingLinkHover: "hover:border-estate-stone-cool/40 hover:text-estate-stone-cool-light",
   modalPrimary:
-    "btn-shimmer-blue rounded-xl bg-estate-blue py-2.5 text-sm font-semibold text-white shadow-lg shadow-estate-blue/30 transition hover:bg-estate-blue-dark disabled:cursor-not-allowed disabled:opacity-50",
+    "btn-shimmer-stone-cool rounded-xl bg-estate-stone-cool py-2.5 text-sm font-semibold text-white shadow-lg shadow-estate-stone-cool/30 transition hover:bg-estate-stone-cool-dark disabled:cursor-not-allowed disabled:opacity-50",
   logoActive:
-    "bg-estate-blue/20 shadow-lg shadow-estate-blue/30 ring-1 ring-estate-blue/40",
+    "bg-estate-stone-cool/20 shadow-lg shadow-estate-stone-cool/30 ring-1 ring-estate-stone-cool/40",
 };
 
 const ACCENT_THEME = {
@@ -172,8 +175,41 @@ const ACCENT_THEME = {
 
 export function getModeTheme(mode) {
   if (mode === "desencombrer") return STONE_THEME;
-  if (mode === "remplacer") return BLUE_THEME;
+  if (mode === "remplacer") return STONE_COOL_THEME;
   return ACCENT_THEME;
+}
+
+function createStoneTabTheme(variant) {
+  const v = variant ? `-${variant}` : "";
+  return {
+    bg: `bg-estate-stone${v}`,
+    bgSubtle: `bg-estate-stone${v}/15`,
+    text: `text-estate-stone${v}-light`,
+    border: `border-estate-stone${v}/40`,
+    shadow: `shadow-estate-stone${v}/25`,
+    shadowLg: `shadow-lg shadow-estate-stone${v}/30`,
+    navIndicator: `bg-estate-stone${v}`,
+  };
+}
+
+const MODE_TAB_THEMES = {
+  meubler: createStoneTabTheme("warm"),
+  remplacer: createStoneTabTheme("cool"),
+  desencombrer: createStoneTabTheme(""),
+};
+
+const SECONDARY_TAB_THEMES = {
+  plan: createStoneTabTheme("warm"),
+  properties: createStoneTabTheme(""),
+  agency: createStoneTabTheme("cool"),
+};
+
+export function getModeTabTheme(mode) {
+  return MODE_TAB_THEMES[mode] ?? createStoneTabTheme("");
+}
+
+export function getSecondaryTabTheme(id) {
+  return SECONDARY_TAB_THEMES[id] ?? createStoneTabTheme("");
 }
 
 export function getAppBgClass(mode) {

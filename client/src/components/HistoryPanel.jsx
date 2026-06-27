@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { ChevronDown, Download, Flag, RefreshCw, Star } from "lucide-react";
 import { MODES } from "../constants/modes";
-import { STYLES } from "../constants/styles";
+import { getStyleById } from "../constants/styles";
 import { ROOM_TYPES } from "../constants/roomTypes";
 import { getModeTheme } from "../utils/modeTheme";
 
@@ -24,7 +24,7 @@ function getModeLabel(mode) {
 }
 
 function getStyleLabel(styleId) {
-  return STYLES.find((s) => s.id === styleId)?.label ?? styleId;
+  return getStyleById(styleId)?.label ?? styleId;
 }
 
 function getRoomLabel(roomId) {

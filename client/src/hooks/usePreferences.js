@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { applyTheme } from "../utils/theme";
+import { GENERATION_TUNING_DEFAULTS } from "../constants/generationTuning";
 
 const STORAGE_KEY = "realstage_prefs";
 
@@ -11,6 +12,7 @@ const DEFAULTS = {
   roomSqm: null,
   listingMode: false,
   theme: "light",
+  generationTuning: { ...GENERATION_TUNING_DEFAULTS },
 };
 
 const listeners = new Set();

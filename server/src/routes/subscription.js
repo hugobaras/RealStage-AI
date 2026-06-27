@@ -3,6 +3,10 @@ import { PLANS } from "../config/plans.js";
 import { getStripeConfig } from "../config.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import {
+  ensureConfigCache,
+  getConfigCacheSync,
+} from "../services/configStore.js";
+import {
   activatePlanDemo,
   cancelSubscriptionDemo,
   getSubscriptionState,
@@ -40,12 +44,19 @@ router.get("/subscription", requireAuth, async (req, res, next) => {
   }
 });
 
-router.get("/subscription/plans", (_req, res) => {
-  res.json({
-    plans: Object.values(PLANS),
-    demoMode: !isStripeConfigured(),
-    stripeConfigured: isStripeConfigured(),
-  });
+router.get("/subscription/plans", async (_req, res, next) => {
+  try {
+    await ensureConfigCache();
+    const { items, trialLimit } = getConfigCacheSync().plans ?? {};
+    res.json({
+      plans: items ?? Object.values(PLANS),
+      trialLimit: trialLimit ?? 3,
+      demoMode: !isStripeConfigured(),
+      stripeConfigured: isStripeConfigured(),
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post("/subscription/activate", requireAuth, async (req, res, next) => {

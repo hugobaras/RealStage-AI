@@ -132,7 +132,7 @@ function TestimonialTrack() {
                 <Star key={s} className="h-3.5 w-3.5 fill-accent text-accent" />
               ))}
             </div>
-            <span className="mt-4 inline-block w-fit rounded-full bg-surface px-3 py-1 text-xs font-semibold text-estate-blue">
+            <span className="mt-4 inline-block w-fit rounded-full bg-surface px-3 py-1 text-xs font-semibold text-estate-stone-cool">
               {t.stat}
             </span>
             <p className="mt-4 flex-1 font-display text-base italic leading-relaxed text-fg-subtle">
@@ -344,7 +344,7 @@ export default function LandingPage() {
 
                 <div className="absolute -left-4 top-8 z-30 hidden animate-fade-up rounded-xl border border-line bg-white px-4 py-3 shadow-lg sm:block">
                   <div className="landing-label text-[10px]">Génération</div>
-                  <div className="font-display text-xl font-semibold text-estate-blue">
+                  <div className="font-display text-xl font-semibold text-estate-stone-cool">
                     &lt; 15 sec
                   </div>
                 </div>
@@ -636,7 +636,7 @@ export default function LandingPage() {
                           key={`${feature}-${index}`}
                           className={`flex items-start gap-2 text-sm ${
                             index === 0 && plan.id !== "starter"
-                              ? "font-semibold text-estate-blue"
+                              ? "font-semibold text-estate-stone-cool"
                               : "text-fg-subtle"
                           }`}
                         >

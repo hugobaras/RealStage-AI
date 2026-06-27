@@ -9,8 +9,15 @@ export async function runDeclutter(
   baseImageBuffer,
   roomType,
   deepThinking = false,
+  tuning = null,
 ) {
   const { declutterModel } = getFalConfig();
   const prompt = buildDeclutterPrompt(roomType);
-  return runFluxEdit(baseImageBuffer, prompt, declutterModel, deepThinking);
+  return runFluxEdit(
+    baseImageBuffer,
+    prompt,
+    declutterModel,
+    deepThinking,
+    tuning,
+  );
 }

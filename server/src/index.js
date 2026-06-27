@@ -14,7 +14,10 @@ import billingWebhookRouter from "./routes/billing.js";
 import propertiesRouter from "./routes/properties.js";
 import agencySettingsRouter from "./routes/agencySettings.js";
 import reportsRouter from "./routes/reports.js";
+import adminRouter from "./routes/admin/index.js";
+import configRouter from "./routes/config.js";
 import { initFirebaseAdmin } from "./services/firebaseAdmin.js";
+import { refreshConfigCache } from "./services/configStore.js";
 import { isStripeConfigured } from "./services/stripeService.js";
 import { formatFalError } from "./utils/falErrors.js";
 
@@ -26,6 +29,9 @@ const stripeConfig = getStripeConfig();
 
 if (firebaseConfig.configured) {
   initFirebaseAdmin();
+  refreshConfigCache().catch((err) => {
+    console.warn("Config cache init:", err.message);
+  });
 }
 
 const corsOrigins = [
@@ -64,6 +70,8 @@ app.use("/api", subscriptionRouter);
 app.use("/api", propertiesRouter);
 app.use("/api", agencySettingsRouter);
 app.use("/api", reportsRouter);
+app.use("/api/config", configRouter);
+app.use("/api/admin", adminRouter);
 app.use("/api", generationsRouter);
 app.use("/api", generateRouter);
 

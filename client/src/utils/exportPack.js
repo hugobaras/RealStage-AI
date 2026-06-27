@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { ROOM_TYPES } from "../constants/roomTypes";
-import { STYLES } from "../constants/styles";
+import { getStyleById } from "../constants/styles";
 import { normalizeAgencyTypography } from "../constants/agencyTypography";
 
 function loadImage(src) {
@@ -57,7 +57,7 @@ export function slugifyAddress(address) {
 
 function getStyleSlug(styleId) {
   if (!styleId) return "apres";
-  const style = STYLES.find((s) => s.id === styleId);
+  const style = getStyleById(styleId);
   return (style?.label ?? styleId)
     .toLowerCase()
     .normalize("NFD")
@@ -100,7 +100,13 @@ function brandingFooterHeight(branding) {
   return h;
 }
 
-function drawBrandingFooter(ctx, branding, canvasWidth, canvasHeight, scale = 1) {
+function drawBrandingFooter(
+  ctx,
+  branding,
+  canvasWidth,
+  canvasHeight,
+  scale = 1,
+) {
   if (!branding) return;
   const typo = brandingTypography(branding);
   const marginX = Math.round(16 * scale);

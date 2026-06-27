@@ -225,6 +225,136 @@ export async function getUserCredits(uid) {
   return doc.data()?.creditsUsed ?? 0;
 }
 
+export async function deleteGeneration(uid, id) {
+  if (!isFirebaseConfigured()) {
+    throw Object.assign(new Error("Firebase non configuré."), { status: 503 });
+  }
+  initFirebaseAdmin();
+
+  const ref = getFirestore()
+    .collection("users")
+    .doc(uid)
+    .collection("generations")
+    .doc(id);
+
+  const doc = await ref.get();
+  if (!doc.exists) {
+    const err = new Error("Génération introuvable.");
+    err.status = 404;
+    throw err;
+  }
+
+  const data = doc.data();
+
+  if (isStorageEnabled()) {
+    const bucketRef = bucket();
+    const paths = [data.baseImagePath, data.resultImagePath].filter(Boolean);
+    await Promise.all(
+      paths.map((p) =>
+        bucketRef
+          .file(p)
+          .delete()
+          .catch(() => {}),
+      ),
+    );
+  }
+
+  await ref.delete();
+  return { id, deleted: true };
+}
+
+export async function listGenerationsAdmin({
+  uid = null,
+  mode = null,
+  limit = 50,
+} = {}) {
+  if (!isFirebaseConfigured()) return [];
+  initFirebaseAdmin();
+
+  const db = getFirestore();
+  const results = [];
+
+  if (uid) {
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("generations")
+      .orderBy("createdAt", "desc")
+      .limit(Math.min(limit, 100))
+      .get();
+
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      if (mode && data.mode !== mode) continue;
+      results.push({
+        id: doc.id,
+        uid,
+        mode: data.mode,
+        roomType: data.roomType,
+        style: data.style ?? null,
+        favorite: data.favorite ?? false,
+        propertyId: data.propertyId ?? null,
+        createdAt: data.createdAt?.toMillis?.() ?? null,
+        imageUrl: await resolveImageUrl(data).catch(() => null),
+      });
+    }
+    return results;
+  }
+
+  try {
+    const snapshot = await db
+      .collectionGroup("generations")
+      .orderBy("createdAt", "desc")
+      .limit(Math.min(limit, 100))
+      .get();
+
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      if (mode && data.mode !== mode) continue;
+      const userUid = doc.ref.parent.parent?.id;
+      results.push({
+        id: doc.id,
+        uid: userUid,
+        mode: data.mode,
+        roomType: data.roomType,
+        style: data.style ?? null,
+        favorite: data.favorite ?? false,
+        propertyId: data.propertyId ?? null,
+        createdAt: data.createdAt?.toMillis?.() ?? null,
+        imageUrl: await resolveImageUrl(data).catch(() => null),
+      });
+    }
+  } catch {
+    const usersSnap = await db.collection("users").limit(20).get();
+    for (const userDoc of usersSnap.docs) {
+      const snapshot = await userDoc.ref
+        .collection("generations")
+        .orderBy("createdAt", "desc")
+        .limit(10)
+        .get();
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        if (mode && data.mode !== mode) continue;
+        results.push({
+          id: doc.id,
+          uid: userDoc.id,
+          mode: data.mode,
+          roomType: data.roomType,
+          style: data.style ?? null,
+          favorite: data.favorite ?? false,
+          propertyId: data.propertyId ?? null,
+          createdAt: data.createdAt?.toMillis?.() ?? null,
+          imageUrl: await resolveImageUrl(data).catch(() => null),
+        });
+      }
+    }
+    results.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+    return results.slice(0, limit);
+  }
+
+  return results;
+}
+
 export function isGenerationStorageEnabled() {
   return isStorageEnabled();
 }

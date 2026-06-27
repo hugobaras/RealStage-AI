@@ -21,6 +21,7 @@ router.get("/me", requireAuth, (req, res) => {
     authenticated: true,
     firebaseConfigured: true,
     user: req.user,
+    admin: req.user.admin === true,
   });
 });
 

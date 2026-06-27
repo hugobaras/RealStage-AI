@@ -4,7 +4,7 @@ export const PLANS = [
   {
     id: "starter",
     label: "Starter",
-    priceMonthly: 19,
+    priceMonthly: 29,
     generationsPerMonth: 30,
     deepThinkingPerMonth: 10,
     features: [
@@ -18,7 +18,7 @@ export const PLANS = [
   {
     id: "pro",
     label: "Pro",
-    priceMonthly: 39,
+    priceMonthly: 59,
     generationsPerMonth: 100,
     deepThinkingPerMonth: 50,
     popular: true,
@@ -26,18 +26,20 @@ export const PLANS = [
       "100 générations / mois",
       "50 réflexions approfondies / mois",
       "Tous les styles & pièces",
+      "Réglages IA avancés (fidélité / créativité)",
       "Support prioritaire",
     ],
   },
   {
     id: "agence",
     label: "Agence",
-    priceMonthly: 129,
+    priceMonthly: 149,
     generationsPerMonth: null,
     deepThinkingPerMonth: null,
     features: [
       "Générations illimitées",
       "Réflexion approfondie illimitée",
+      "Réglages IA avancés (fidélité / créativité)",
       "Usage multi-projets",
       "Historique complet",
       "Support dédié",
