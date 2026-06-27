@@ -4,6 +4,7 @@ import { getPlanRank, isValidPlanId } from "../config/plans.js";
 import { applyStripeSubscription } from "./subscriptionService.js";
 
 let stripeClient = null;
+let planChangePortalConfigId = null;
 
 export function isStripeConfigured() {
   return getStripeConfig().configured;
@@ -175,6 +176,80 @@ export async function getOrCreateStripeCustomer(uid, email) {
 }
 
 /**
+ * Configuration portail avec subscription_update activé (requis pour
+ * subscription_update_confirm). Créée/mise à jour automatiquement via l'API.
+ */
+async function ensurePlanChangePortalConfiguration() {
+  if (planChangePortalConfigId) {
+    return planChangePortalConfigId;
+  }
+
+  const stripe = getStripe();
+  const { prices } = getStripeConfig();
+  const priceIds = Object.values(prices).filter(Boolean);
+  if (priceIds.length === 0) {
+    throw new Error("Aucun prix Stripe configuré.");
+  }
+
+  const priceRecords = await Promise.all(
+    priceIds.map((id) => stripe.prices.retrieve(id)),
+  );
+
+  const productIds = [
+    ...new Set(
+      priceRecords.map((price) =>
+        typeof price.product === "string" ? price.product : price.product.id,
+      ),
+    ),
+  ];
+
+  // Tous les forfaits interchangeables, y compris entre produits distincts.
+  const products = productIds.map((product) => ({
+    product,
+    prices: priceIds,
+  }));
+
+  const subscriptionUpdate = {
+    enabled: true,
+    default_allowed_updates: ["price"],
+    proration_behavior: "create_prorations",
+    products,
+  };
+
+  const configs = await stripe.billingPortal.configurations.list({
+    limit: 100,
+    active: true,
+  });
+  const existing = configs.data.find(
+    (config) => config.metadata?.realstage_plan_changes === "true",
+  );
+
+  if (existing) {
+    const updated = await stripe.billingPortal.configurations.update(
+      existing.id,
+      { features: { subscription_update: subscriptionUpdate } },
+    );
+    planChangePortalConfigId = updated.id;
+    return planChangePortalConfigId;
+  }
+
+  const created = await stripe.billingPortal.configurations.create({
+    name: "RealStage AI — changement de forfait",
+    metadata: { realstage_plan_changes: "true" },
+    features: {
+      subscription_update: subscriptionUpdate,
+      payment_method_update: { enabled: true },
+      invoice_history: { enabled: true },
+      customer_update: { enabled: false },
+      subscription_cancel: { enabled: false },
+    },
+  });
+
+  planChangePortalConfigId = created.id;
+  return planChangePortalConfigId;
+}
+
+/**
  * Changement de forfait : portail Stripe avec confirmation de paiement
  * (prorata facturé), au lieu d'une mise à jour silencieuse côté API.
  */
@@ -196,8 +271,11 @@ async function createPlanChangePortalSession({ planId, stripeSubscription }) {
     throw new Error("Abonnement Stripe invalide.");
   }
 
+  const configuration = await ensurePlanChangePortalConfiguration();
+
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
+    configuration,
     return_url: `${clientUrl}/pricing`,
     flow_data: {
       type: "subscription_update_confirm",
