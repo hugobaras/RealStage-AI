@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Building2, Plus } from "lucide-react";
 import MainLayout from "./MainLayout";
 import AppShell from "./AppShell";
-import MobileAppNav from "./MobileAppNav";
+import SecondaryPageLayout from "./SecondaryPageLayout";
 import PropertyCreateModal from "./PropertyCreateModal";
 import { createProperty, fetchProperties } from "../api/properties";
 import { useAuth } from "../contexts/AuthContext";
@@ -61,41 +61,38 @@ export function PropertiesListPage() {
   if (!hasFeature("multiProjects")) {
     return (
       <AppShell>
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto bg-deep p-6 text-center">
-          <MobileAppNav />
-          <Building2 className="mb-4 h-12 w-12 text-fg-subtle" />
-          <h1 className="font-display text-xl font-semibold text-fg">
-            Projets par bien
-          </h1>
-          <p className="mt-2 max-w-md text-sm text-fg-muted">
-            Un dossier par adresse avec pièces, historique et export groupé —
-            forfait Agence.
-          </p>
-          <Link to="/pricing" className="btn-primary mt-6">
-            Voir les forfaits
-          </Link>
-        </div>
+        <SecondaryPageLayout title="Projets par bien">
+          <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+            <Building2 className="mb-4 h-12 w-12 text-fg-subtle" />
+            <p className="mt-2 max-w-md text-sm text-fg-muted">
+              Un dossier par adresse avec pièces, historique et export groupé —
+              forfait Agence.
+            </p>
+            <Link to="/pricing" className="btn-primary mt-6">
+              Voir les forfaits
+            </Link>
+          </div>
+        </SecondaryPageLayout>
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-deep">
-        <MobileAppNav />
-        <header className="flex items-center justify-between gap-4 border-b border-line bg-panel px-4 py-4 lg:px-8">
-          <h1 className="font-display text-2xl font-semibold text-fg">
-            Mes biens
-          </h1>
+      <SecondaryPageLayout
+        title="Mes biens"
+        headerAction={
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="btn-primary flex items-center gap-2 text-sm"
+            className="btn-primary flex shrink-0 items-center gap-2 text-sm"
           >
             <Plus className="h-4 w-4" />
-            Nouveau bien
+            <span className="hidden sm:inline">Nouveau bien</span>
+            <span className="sm:hidden">Nouveau</span>
           </button>
-        </header>
+        }
+      >
         <div className="mx-auto w-full max-w-3xl p-4 lg:p-8">
           {loading ? (
             <p className="text-sm text-fg-muted">Chargement…</p>
@@ -143,7 +140,7 @@ export function PropertiesListPage() {
             <p className="mt-4 text-sm text-red-400">{createError}</p>
           )}
         </div>
-      </div>
+      </SecondaryPageLayout>
 
       <PropertyCreateModal
         open={createOpen}

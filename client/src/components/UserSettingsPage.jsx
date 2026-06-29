@@ -16,7 +16,7 @@ import { useSubscription } from "../contexts/SubscriptionContext";
 import { usePreferences } from "../hooks/usePreferences";
 import { patchMePreferences } from "../api/preferences";
 import AppShell from "./AppShell";
-import MobileAppNav from "./MobileAppNav";
+import SecondaryPageLayout from "./SecondaryPageLayout";
 import ThemeToggle from "./ThemeToggle";
 
 function SettingsSection({ icon: Icon, title, description, children }) {
@@ -189,16 +189,10 @@ export default function UserSettingsPage() {
 
   return (
     <AppShell>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-deep app-themed">
-        <MobileAppNav />
-        <header className="border-b border-line bg-panel px-4 py-4 lg:px-8">
-          <h1 className="font-display text-2xl font-semibold text-fg">
-            Mon compte
-          </h1>
-          <p className="mt-1 text-sm text-fg-muted">
-            Profil, sécurité et abonnement.
-          </p>
-        </header>
+      <SecondaryPageLayout title="Mon compte">
+        <p className="border-b border-line bg-panel/50 px-4 py-2 text-sm text-fg-muted md:px-6 lg:px-8">
+          Profil, sécurité et abonnement.
+        </p>
 
         <div className="mx-auto w-full max-w-2xl space-y-5 p-4 lg:p-8">
           <div className="flex items-center gap-4 rounded-2xl border border-line bg-panel/80 px-5 py-4">
@@ -514,14 +508,14 @@ export default function UserSettingsPage() {
             <button
               type="button"
               onClick={() => logout()}
-              className="inline-flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-fg-subtle transition hover:border-red-900/50 hover:bg-red-950/30 hover:text-red-300"
+              className="btn-primary inline-flex items-center gap-2 text-sm"
             >
               <LogOut className="h-4 w-4" />
               Se déconnecter
             </button>
           </div>
         </div>
-      </div>
+      </SecondaryPageLayout>
     </AppShell>
   );
 }

@@ -26,6 +26,120 @@ import GenerationTuningPanel from "./GenerationTuningPanel";
 import { getModeTheme } from "../utils/modeTheme";
 import { isStyleMode } from "../constants/modes";
 
+export function GenerateActionButtons({
+  mode,
+  baseImage,
+  loading,
+  generateLabel,
+  onGenerateClick,
+  onBatchGenerateClick,
+  onVariantsGenerateClick,
+  variantStyles,
+  queueCount,
+  totalQueuePhotos,
+  batchResultsCount = 0,
+  onExportBatchPack,
+  exportingPack = false,
+  horizontal = false,
+  hideEmptyHint = false,
+}) {
+  const showStyleOptions = isStyleMode(mode);
+  const theme = getModeTheme(mode);
+
+  const handleGenerateClick = () => {
+    if (!baseImage || loading) return;
+    onGenerateClick();
+  };
+
+  const btnBase = horizontal
+    ? "min-w-0 flex-1 rounded-lg py-2 text-xs font-semibold sm:text-sm"
+    : "w-full rounded-xl py-3 text-sm font-semibold";
+
+  const primaryClass = horizontal
+    ? `${btnBase} text-white ${theme.btnPrimaryLg}`
+    : `w-full py-4 text-base font-bold text-white shadow-xl ${theme.btnPrimaryLg}`;
+
+  const secondaryClass = horizontal
+    ? `${btnBase} btn-secondary`
+    : "btn-secondary w-full py-3 text-sm font-semibold";
+
+  const chainClass = horizontal
+    ? `${btnBase} border ${theme.chainBtn}`
+    : `w-full rounded-xl border py-3 text-sm font-semibold ${theme.chainBtn}`;
+
+  return (
+    <div className={horizontal ? "space-y-2" : "space-y-2"}>
+      <div
+        className={
+          horizontal ? "flex flex-wrap items-stretch gap-2" : "space-y-2"
+        }
+      >
+        <button
+          type="button"
+          onClick={handleGenerateClick}
+          disabled={!baseImage || loading}
+          className={`${primaryClass} disabled:opacity-40`}
+          title="Raccourci : ⌘ + Entrée"
+        >
+          {loading ? "En cours…" : generateLabel}
+        </button>
+        {showStyleOptions &&
+          variantStyles?.length >= 2 &&
+          onVariantsGenerateClick && (
+            <button
+              type="button"
+              onClick={onVariantsGenerateClick}
+              disabled={!baseImage || loading}
+              className={`${chainClass} disabled:opacity-40`}
+            >
+              {horizontal
+                ? `${variantStyles.length} var.`
+                : `Générer ${variantStyles.length} variantes`}
+            </button>
+          )}
+        {queueCount > 0 && onBatchGenerateClick && (
+          <button
+            type="button"
+            onClick={onBatchGenerateClick}
+            disabled={!baseImage || loading}
+            className={`${secondaryClass} disabled:opacity-40`}
+          >
+            {horizontal
+              ? `Lot (${totalQueuePhotos ?? queueCount + 1})`
+              : `Générer tout (${totalQueuePhotos ?? queueCount + 1})`}
+          </button>
+        )}
+      </div>
+
+      {batchResultsCount > 0 && onExportBatchPack && (
+        <button
+          type="button"
+          onClick={onExportBatchPack}
+          disabled={loading || exportingPack}
+          className={`${chainClass} w-full disabled:opacity-40`}
+        >
+          <span className="inline-flex items-center justify-center gap-1.5">
+            <Layers className="h-3.5 w-3.5" />
+            Exporter le lot ({batchResultsCount})
+          </span>
+        </button>
+      )}
+
+      {!hideEmptyHint && !baseImage && (
+        <p
+          className={`text-center text-fg-muted ${
+            horizontal ? "text-[10px]" : "text-[11px]"
+          }`}
+        >
+          {horizontal
+            ? "Ajoutez une photo ci-dessous"
+            : "Importez une photo pour activer la génération"}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function CollapsibleSection({
   title,
   hint,
@@ -315,6 +429,7 @@ export default function ControlPanel({
   onUpgradeForTuning,
   aiLabelEnabled,
   onAiLabelEnabledChange,
+  compactInline = false,
 }) {
   const isDeclutter = mode === "desencombrer";
   const showStyleOptions = isStyleMode(mode);
@@ -327,11 +442,6 @@ export default function ControlPanel({
     () => getStyleCategoryOrder(roomType),
     [roomType],
   );
-
-  const handleGenerateClick = () => {
-    if (!baseImage || loading) return;
-    onGenerateClick();
-  };
 
   const deepThinkingHint = (() => {
     if (deepThinkingLimit == null) {
@@ -422,6 +532,256 @@ export default function ControlPanel({
     </div>
   );
 
+  const renderGenerateActions = (horizontal = false) => (
+    <GenerateActionButtons
+      mode={mode}
+      baseImage={baseImage}
+      loading={loading}
+      generateLabel={generateLabel}
+      onGenerateClick={onGenerateClick}
+      onBatchGenerateClick={onBatchGenerateClick}
+      onVariantsGenerateClick={onVariantsGenerateClick}
+      variantStyles={variantStyles}
+      queueCount={queueCount}
+      totalQueuePhotos={totalQueuePhotos}
+      batchResultsCount={batchResultsCount}
+      onExportBatchPack={onExportBatchPack}
+      exportingPack={exportingPack}
+      horizontal={horizontal}
+    />
+  );
+
+  const generateFooter = (
+    <div className="panel-sticky-footer mt-auto space-y-2">
+      {renderGenerateActions(false)}
+    </div>
+  );
+
+  const settingsFields = (
+    <>
+      {!isDeclutter && showStyleOptions && (
+        <SearchableSelect
+          label="Nouveau style"
+          value={style}
+          options={styleOptions}
+          categoryOrder={styleCategoryOrder}
+          resolveOption={getStyleById}
+          onChange={onStyleChange}
+          disabled={loading}
+          theme={theme}
+        />
+      )}
+
+      <SearchableSelect
+        label="De quelle pièce s'agit-il ?"
+        value={roomType}
+        options={ROOM_TYPES}
+        categoryOrder={ROOM_CATEGORY_ORDER}
+        onChange={onRoomTypeChange}
+        disabled={loading}
+        theme={theme}
+      />
+
+      {showStyleOptions && !compactInline && (
+        <CollapsibleSection
+          title="Variantes A / B / C"
+          hint="Comparer 2 ou 3 styles sur la même photo"
+          theme={theme}
+        >
+          <VariantPicker
+            mode={mode}
+            roomType={roomType}
+            currentStyle={style}
+            selectedStyles={variantStyles}
+            onChange={onVariantStylesChange}
+            disabled={loading}
+            embedded
+          />
+        </CollapsibleSection>
+      )}
+
+      <CollapsibleSection
+        title={isDeclutter ? "Ajustements & export" : "Surface & ajustements"}
+        hint={
+          isDeclutter
+            ? "Luminosité, température, export"
+            : "m², luminosité, export"
+        }
+        theme={theme}
+      >
+        {!isDeclutter && mode === "meubler" && (
+          <RoomSqmField
+            value={roomSqm}
+            roomType={roomType}
+            onChange={onRoomSqmChange}
+            disabled={loading}
+            theme={theme}
+          />
+        )}
+        <div
+          className={
+            isDeclutter ? "" : "space-y-4 border-t border-line/80 pt-3"
+          }
+        >
+          {adjustmentsBlock}
+        </div>
+      </CollapsibleSection>
+
+      <div
+        className={`flex items-center justify-between rounded-xl border border-line/80 ${
+          compactInline ? "gap-2 px-2.5 py-2" : "gap-3 px-3 py-2.5"
+        }`}
+      >
+        <div className="flex min-w-0 items-center gap-2">
+          <Zap className={`h-3.5 w-3.5 shrink-0 ${theme.icon}`} />
+          <div className="min-w-0">
+            <p
+              className={`font-medium text-fg ${compactInline ? "text-xs" : "text-sm"}`}
+            >
+              Réflexion approfondie
+            </p>
+            {!compactInline && (
+              <p className="text-[11px] text-muted">{deepThinkingHint}</p>
+            )}
+          </div>
+        </div>
+        <label
+          className={`relative inline-flex shrink-0 items-center ${deepThinkingDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+        >
+          <input
+            type="checkbox"
+            className="peer sr-only"
+            checked={deepThinking}
+            onChange={(e) => onDeepThinkingChange(e.target.checked)}
+            disabled={deepThinkingDisabled}
+          />
+          <div
+            className={`h-5 w-9 rounded-full bg-elevated after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all ${theme.peerChecked} peer-focus:outline-none`}
+          />
+        </label>
+      </div>
+
+      {!compactInline && (
+        <CollapsibleSection
+          title="Réglages IA avancés"
+          hint={
+            canUseGenerationTuning
+              ? "Fidélité, précision du prompt, niveau de détail"
+              : "Réservé Pro & Agence"
+          }
+          theme={theme}
+        >
+          <GenerationTuningPanel
+            value={generationTuning}
+            onChange={onGenerationTuningChange}
+            disabled={loading}
+            theme={theme}
+            locked={!canUseGenerationTuning}
+            onUpgradeClick={onUpgradeForTuning}
+          />
+        </CollapsibleSection>
+      )}
+    </>
+  );
+
+  if (compactInline) {
+    return (
+      <aside className="px-3 pb-2 md:hidden">
+        <div className="overflow-hidden rounded-xl border border-line/80 bg-surface/40">
+          <div className="max-h-[42dvh] space-y-2 overflow-y-auto p-3 scrollbar-thin">
+            <div
+              className={`grid gap-2 ${!isDeclutter && showStyleOptions ? "grid-cols-2" : "grid-cols-1"}`}
+            >
+              {!isDeclutter && showStyleOptions && (
+                <SearchableSelect
+                  label="Style"
+                  value={style}
+                  options={styleOptions}
+                  categoryOrder={styleCategoryOrder}
+                  resolveOption={getStyleById}
+                  onChange={onStyleChange}
+                  disabled={loading}
+                  theme={theme}
+                />
+              )}
+              <SearchableSelect
+                label="Pièce"
+                value={roomType}
+                options={ROOM_TYPES}
+                categoryOrder={ROOM_CATEGORY_ORDER}
+                onChange={onRoomTypeChange}
+                disabled={loading}
+                theme={theme}
+              />
+            </div>
+
+            {!isDeclutter && mode === "meubler" && (
+              <RoomSqmField
+                value={roomSqm}
+                roomType={roomType}
+                onChange={onRoomSqmChange}
+                disabled={loading}
+                theme={theme}
+              />
+            )}
+
+            {showStyleOptions && variantStyles?.length >= 2 && (
+              <CollapsibleSection
+                title="Variantes"
+                hint={`${variantStyles.length} styles sélectionnés`}
+                theme={theme}
+              >
+                <VariantPicker
+                  mode={mode}
+                  roomType={roomType}
+                  currentStyle={style}
+                  selectedStyles={variantStyles}
+                  onChange={onVariantStylesChange}
+                  disabled={loading}
+                  embedded
+                />
+              </CollapsibleSection>
+            )}
+
+            <div className="flex items-center justify-between rounded-xl border border-line/80 px-2.5 py-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <Zap className={`h-3.5 w-3.5 shrink-0 ${theme.icon}`} />
+                <p className="text-xs font-medium text-fg">
+                  Réflexion approfondie
+                </p>
+              </div>
+              <label
+                className={`relative inline-flex shrink-0 items-center ${deepThinkingDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+              >
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={deepThinking}
+                  onChange={(e) => onDeepThinkingChange(e.target.checked)}
+                  disabled={deepThinkingDisabled}
+                />
+                <div
+                  className={`h-5 w-9 rounded-full bg-elevated after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all ${theme.peerChecked} peer-focus:outline-none`}
+                />
+              </label>
+            </div>
+
+            {error && (
+              <p
+                className="rounded-lg border border-red-900/50 bg-red-950/40 px-2.5 py-1.5 text-xs text-red-300"
+                role="alert"
+              >
+                {error}
+              </p>
+            )}
+
+            {renderGenerateActions(true)}
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <aside className="flex h-full flex-col overflow-y-auto bg-panel/95 backdrop-blur-sm scrollbar-thin lg:bg-panel/90">
       <div className="flex flex-1 flex-col gap-3.5 p-3.5 lg:p-4">
@@ -450,118 +810,7 @@ export default function ControlPanel({
           theme={theme}
         />
 
-        {!isDeclutter && showStyleOptions && (
-          <SearchableSelect
-            label="Nouveau style"
-            value={style}
-            options={styleOptions}
-            categoryOrder={styleCategoryOrder}
-            resolveOption={getStyleById}
-            onChange={onStyleChange}
-            disabled={loading}
-            theme={theme}
-          />
-        )}
-
-        <SearchableSelect
-          label="De quelle pièce s'agit-il ?"
-          value={roomType}
-          options={ROOM_TYPES}
-          categoryOrder={ROOM_CATEGORY_ORDER}
-          onChange={onRoomTypeChange}
-          disabled={loading}
-          theme={theme}
-        />
-
-        {showStyleOptions && (
-          <CollapsibleSection
-            title="Variantes A / B / C"
-            hint="Comparer 2 ou 3 styles sur la même photo"
-            theme={theme}
-          >
-            <VariantPicker
-              mode={mode}
-              roomType={roomType}
-              currentStyle={style}
-              selectedStyles={variantStyles}
-              onChange={onVariantStylesChange}
-              disabled={loading}
-              embedded
-            />
-          </CollapsibleSection>
-        )}
-
-        <CollapsibleSection
-          title={isDeclutter ? "Ajustements & export" : "Surface & ajustements"}
-          hint={
-            isDeclutter
-              ? "Luminosité, température, export"
-              : "m², luminosité, export"
-          }
-          theme={theme}
-        >
-          {!isDeclutter && mode === "meubler" && (
-            <RoomSqmField
-              value={roomSqm}
-              roomType={roomType}
-              onChange={onRoomSqmChange}
-              disabled={loading}
-              theme={theme}
-            />
-          )}
-          <div
-            className={
-              isDeclutter ? "" : "space-y-4 border-t border-line/80 pt-3"
-            }
-          >
-            {adjustmentsBlock}
-          </div>
-        </CollapsibleSection>
-
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-line/80 px-3 py-2.5">
-          <div className="flex min-w-0 items-center gap-2">
-            <Zap className={`h-4 w-4 shrink-0 ${theme.icon}`} />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-fg">
-                Réflexion approfondie
-              </p>
-              <p className="text-[11px] text-muted">{deepThinkingHint}</p>
-            </div>
-          </div>
-          <label
-            className={`relative inline-flex shrink-0 items-center ${deepThinkingDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-          >
-            <input
-              type="checkbox"
-              className="peer sr-only"
-              checked={deepThinking}
-              onChange={(e) => onDeepThinkingChange(e.target.checked)}
-              disabled={deepThinkingDisabled}
-            />
-            <div
-              className={`h-5 w-9 rounded-full bg-elevated after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all ${theme.peerChecked} peer-focus:outline-none`}
-            />
-          </label>
-        </div>
-
-        <CollapsibleSection
-          title="Réglages IA avancés"
-          hint={
-            canUseGenerationTuning
-              ? "Fidélité, précision du prompt, niveau de détail"
-              : "Réservé Pro & Agence"
-          }
-          theme={theme}
-        >
-          <GenerationTuningPanel
-            value={generationTuning}
-            onChange={onGenerationTuningChange}
-            disabled={loading}
-            theme={theme}
-            locked={!canUseGenerationTuning}
-            onUpgradeClick={onUpgradeForTuning}
-          />
-        </CollapsibleSection>
+        {settingsFields}
       </div>
 
       {error && (
@@ -573,57 +822,7 @@ export default function ControlPanel({
         </p>
       )}
 
-      <div className="panel-sticky-footer mt-auto space-y-2">
-        {batchResultsCount > 0 && onExportBatchPack && (
-          <button
-            type="button"
-            onClick={onExportBatchPack}
-            disabled={loading || exportingPack}
-            className={`w-full rounded-xl border py-2.5 text-sm font-semibold transition disabled:opacity-40 ${theme.chainBtn}`}
-          >
-            <span className="inline-flex items-center justify-center gap-1.5">
-              <Layers className="h-4 w-4" />
-              Exporter le lot ({batchResultsCount})
-            </span>
-          </button>
-        )}
-        {queueCount > 0 && onBatchGenerateClick && (
-          <button
-            type="button"
-            onClick={onBatchGenerateClick}
-            disabled={!baseImage || loading}
-            className="btn-secondary w-full py-3 text-sm font-semibold disabled:opacity-40"
-          >
-            Générer tout ({totalQueuePhotos ?? queueCount + 1})
-          </button>
-        )}
-        {showStyleOptions &&
-          variantStyles?.length >= 2 &&
-          onVariantsGenerateClick && (
-            <button
-              type="button"
-              onClick={onVariantsGenerateClick}
-              disabled={!baseImage || loading}
-              className={`w-full rounded-xl border py-3 text-sm font-semibold transition disabled:opacity-40 ${theme.chainBtn}`}
-            >
-              Générer {variantStyles.length} variantes
-            </button>
-          )}
-        <button
-          type="button"
-          onClick={handleGenerateClick}
-          disabled={!baseImage || loading}
-          className={`w-full py-4 text-base font-bold text-white shadow-xl disabled:opacity-40 ${theme.btnPrimaryLg}`}
-          title="Raccourci : ⌘ + Entrée"
-        >
-          {loading ? "Génération en cours…" : generateLabel}
-        </button>
-        {!baseImage && (
-          <p className="mt-2 text-center text-[11px] text-fg-muted">
-            Importez une photo pour activer la génération
-          </p>
-        )}
-      </div>
+      {generateFooter}
     </aside>
   );
 }

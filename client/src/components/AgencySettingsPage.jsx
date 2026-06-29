@@ -8,7 +8,7 @@ import { useSubscription } from "../contexts/SubscriptionContext";
 import { composeSideBySide } from "../utils/exportPack";
 import { compressLogo } from "../utils/imageCompress";
 import AppShell from "./AppShell";
-import MobileAppNav from "./MobileAppNav";
+import SecondaryPageLayout from "./SecondaryPageLayout";
 
 const WATERMARK_POSITIONS = [
   { id: "bottom-right", label: "Bas droite" },
@@ -87,19 +87,17 @@ export default function AgencySettingsPage() {
   if (!hasFeature("agencyPresets")) {
     return (
       <AppShell>
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto bg-deep p-6 text-center">
-          <MobileAppNav />
-          <h1 className="font-display text-xl font-semibold text-fg">
-            Paramètres agence
-          </h1>
-          <p className="mt-2 max-w-md text-sm text-fg-muted">
-            Style par défaut, logo, signature et mentions légales — réservé au
-            forfait Agence.
-          </p>
-          <Link to="/pricing" className="btn-primary mt-6">
-            Voir les forfaits
-          </Link>
-        </div>
+        <SecondaryPageLayout title="Paramètres agence">
+          <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+            <p className="mt-2 max-w-md text-sm text-fg-muted">
+              Style par défaut, logo, signature et mentions légales — réservé au
+              forfait Agence.
+            </p>
+            <Link to="/pricing" className="btn-primary mt-6">
+              Voir les forfaits
+            </Link>
+          </div>
+        </SecondaryPageLayout>
       </AppShell>
     );
   }
@@ -187,18 +185,12 @@ export default function AgencySettingsPage() {
 
   return (
     <AppShell>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-deep">
-        <MobileAppNav />
-        <header className="border-b border-line bg-panel px-4 py-4 lg:px-8">
-          <h1 className="font-display text-2xl font-semibold text-fg">
-            Paramètres agence
-          </h1>
-          <p className="mt-1 text-sm text-fg-muted">
-            Configurez une fois — toutes vos exports suivront votre identité.
-          </p>
-        </header>
+      <SecondaryPageLayout title="Paramètres agence">
+        <p className="border-b border-line bg-panel/50 px-4 py-2 text-sm text-fg-muted md:px-6 lg:px-8">
+          Configurez une fois — toutes vos exports suivront votre identité.
+        </p>
 
-        <div className="mx-auto grid max-w-5xl gap-8 p-4 lg:grid-cols-2 lg:p-8">
+        <div className="mx-auto grid max-w-5xl gap-8 p-4 md:grid-cols-1 lg:grid-cols-2 lg:p-8">
           <div className="space-y-5">
             <label className="block">
               <span className="mb-1 block text-sm font-medium text-fg-subtle">
@@ -375,7 +367,7 @@ export default function AgencySettingsPage() {
             )}
           </div>
         </div>
-      </div>
+      </SecondaryPageLayout>
     </AppShell>
   );
 }

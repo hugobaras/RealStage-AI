@@ -192,7 +192,7 @@ export default function ChatWidget() {
 
   return (
     <>
-      <div className="chat-widget-root pointer-events-none fixed bottom-[calc(3.25rem+1rem+env(safe-area-inset-bottom))] right-4 z-40 lg:bottom-4">
+      <div className="chat-widget-root pointer-events-none fixed bottom-[calc(1rem+var(--layout-safe-bottom)+var(--layout-mobile-bar-offset))] right-4 z-40">
         {open && (
           <div
             className="pointer-events-auto mb-3 flex h-[min(560px,calc(100dvh-7rem))] w-[min(400px,calc(100vw-2rem))] animate-fade-up flex-col overflow-hidden rounded-2xl glass-panel"

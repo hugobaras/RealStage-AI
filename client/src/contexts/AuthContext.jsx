@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   reauthenticateWithCredential,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -45,6 +46,9 @@ function mapAuthError(code) {
       "Erreur réseau. Vérifiez votre connexion et réessayez.",
     "auth/internal-error":
       "Erreur Firebase / Google OAuth. Vérifiez les domaines autorisés et la configuration OAuth.",
+    "auth/requires-recent-login":
+      "Reconnectez-vous puis réessayez de modifier votre mot de passe.",
+    "auth/missing-email": "Aucune adresse e-mail associée à ce compte.",
   };
   return messages[code] ?? "Une erreur est survenue. Réessayez.";
 }
@@ -158,6 +162,19 @@ export function AuthProvider({ children }) {
     [user],
   );
 
+  const sendPasswordReset = useCallback(async (email) => {
+    if (!auth) throw new Error("Firebase non configuré.");
+    const trimmed = email.trim();
+    if (!trimmed) throw new Error("Adresse e-mail invalide.");
+    try {
+      await sendPasswordResetEmail(auth, trimmed, {
+        url: `${window.location.origin}/auth`,
+      });
+    } catch (err) {
+      throw new Error(mapAuthError(err.code));
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -170,6 +187,7 @@ export function AuthProvider({ children }) {
       logout,
       updateDisplayName,
       changePassword,
+      sendPasswordReset,
     }),
     [
       user,
@@ -181,6 +199,7 @@ export function AuthProvider({ children }) {
       logout,
       updateDisplayName,
       changePassword,
+      sendPasswordReset,
     ],
   );
 

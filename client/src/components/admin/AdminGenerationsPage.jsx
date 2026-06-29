@@ -100,7 +100,7 @@ export default function AdminGenerationsPage() {
         {generations.map((gen) => (
           <article
             key={`${gen.uid}-${gen.id}`}
-            className="surface-card overflow-hidden rounded-2xl"
+            className="surface-card overflow-x-auto rounded-2xl"
           >
             {gen.imageUrl ? (
               <img

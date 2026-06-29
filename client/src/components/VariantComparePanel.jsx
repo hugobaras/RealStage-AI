@@ -15,43 +15,36 @@ function getStyleLabel(styleId) {
   return getStyleById(styleId)?.label ?? styleId;
 }
 
-function VariantGrid({ beforeImage, variants, mode }) {
-  const cols = variants.length + 1;
+function VariantGrid({ beforeImage, variants }) {
   return (
-    <div
-      className="absolute inset-0 flex items-center justify-center overflow-auto p-4"
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-        gap: "0.5rem",
-        alignContent: "center",
-      }}
-    >
-      <div className="flex flex-col items-center gap-1">
-        <img
-          src={beforeImage}
-          alt="Avant"
-          className="max-h-[50vh] w-full rounded-lg object-cover"
-        />
-        <span className="text-[10px] font-semibold uppercase text-zinc-400">
-          Avant
-        </span>
-      </div>
-      {variants.map((variant, index) => (
-        <div
-          key={variant.id ?? index}
-          className="flex flex-col items-center gap-1"
-        >
+    <div className="absolute inset-0 overflow-auto p-2 sm:p-4">
+      <div className="mx-auto grid max-w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
+        <div className="flex flex-col items-center gap-1">
           <img
-            src={variant.imageUrl}
-            alt={getStyleLabel(variant.style)}
-            className="max-h-[50vh] w-full rounded-lg object-cover"
+            src={beforeImage}
+            alt="Avant"
+            className="max-h-[40vh] w-full rounded-lg object-cover sm:max-h-[50vh]"
           />
           <span className="text-[10px] font-semibold uppercase text-zinc-400">
-            {String.fromCharCode(65 + index)} — {getStyleLabel(variant.style)}
+            Avant
           </span>
         </div>
-      ))}
+        {variants.map((variant, index) => (
+          <div
+            key={variant.id ?? index}
+            className="flex flex-col items-center gap-1"
+          >
+            <img
+              src={variant.imageUrl}
+              alt={getStyleLabel(variant.style)}
+              className="max-h-[40vh] w-full rounded-lg object-cover sm:max-h-[50vh]"
+            />
+            <span className="text-center text-[10px] font-semibold uppercase text-zinc-400">
+              {String.fromCharCode(65 + index)} — {getStyleLabel(variant.style)}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -107,11 +100,7 @@ export default function VariantComparePanel({
       )}
 
       {view === "grid" && (
-        <VariantGrid
-          beforeImage={beforeImage}
-          variants={activeVariants}
-          mode={mode}
-        />
+        <VariantGrid beforeImage={beforeImage} variants={activeVariants} />
       )}
 
       {view === "switch" && (

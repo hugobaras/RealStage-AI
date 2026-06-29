@@ -25,7 +25,7 @@ export default function WorkflowBar({
       className={`shrink-0 border-b bg-gradient-to-r from-panel via-panel px-4 py-3 to-transparent lg:px-6 ${theme.barBorder} ${theme.workflowGradientEnd}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+        <div className="-mx-4 flex items-center gap-1 overflow-x-auto px-4 pb-0.5 scrollbar-thin sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
           {steps.map((step, index) => {
             const done = index < activeIndex;
             const current = step.id === active;
@@ -55,8 +55,7 @@ export default function WorkflowBar({
                       {index + 1}
                     </span>
                   )}
-                  <span className="hidden sm:inline">{step.label}</span>
-                  <span className="sm:hidden">{step.label.slice(0, 4)}.</span>
+                  <span className="whitespace-nowrap">{step.label}</span>
                 </div>
               </div>
             );

@@ -423,7 +423,7 @@ export default function AdminUserDetailPage() {
       )}
 
       {tab === "generations" && (
-        <section className="surface-card overflow-hidden rounded-2xl">
+        <section className="surface-card overflow-x-auto rounded-2xl">
           <div className="flex items-center justify-between border-b border-line/80 px-4 py-3">
             <h3 className="font-semibold text-fg">
               Dernières générations ({user.generations?.length ?? 0})
@@ -475,7 +475,7 @@ export default function AdminUserDetailPage() {
       )}
 
       {tab === "properties" && (
-        <section className="surface-card overflow-hidden rounded-2xl">
+        <section className="surface-card overflow-x-auto rounded-2xl">
           <h3 className="border-b border-line/80 px-4 py-3 font-semibold text-fg">
             Biens immobiliers ({user.properties?.length ?? 0})
           </h3>

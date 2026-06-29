@@ -5,6 +5,16 @@
 @layer base {
   :root,
   [data-theme="light"] {
+    --layout-sidebar-width: 6rem;
+    --layout-sidebar-compact: 4rem;
+    --layout-controls-width: 17.5rem;
+    --layout-topbar-height: 3.5rem;
+    --layout-fab-size: 3.25rem;
+    --layout-fab-offset: calc(var(--layout-fab-size) + 1rem);
+    --layout-mobile-bar-param-height: 3rem;
+    --layout-mobile-bar-height: 6.5rem;
+    --layout-mobile-bar-offset: 0px;
+    --layout-safe-bottom: env(safe-area-inset-bottom, 0px);
     --c-deep: 250 248 245;
     --c-panel: 255 255 255;
     --c-surface: 240 235 227;
@@ -838,5 +848,22 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: rgb(var(--c-scrollbar));
     border-radius: 4px;
+  }
+
+  .layout-shell {
+    @apply flex h-[100dvh] min-h-0 w-full flex-1 overflow-hidden;
+  }
+
+  .layout-main {
+    @apply flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden;
+  }
+
+  .layout-controls-drawer {
+    width: var(--layout-controls-width);
+    @apply hidden h-full shrink-0 flex-col border-r border-line/80 bg-panel/95 md:flex;
+  }
+
+  [data-mobile-editor] {
+    --layout-mobile-bar-offset: var(--layout-mobile-bar-height);
   }
 }

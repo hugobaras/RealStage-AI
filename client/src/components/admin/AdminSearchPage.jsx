@@ -122,7 +122,7 @@ export default function AdminSearchPage() {
             return (
               <div
                 key={`users-${idx}`}
-                className="surface-card overflow-hidden rounded-2xl"
+                className="surface-card overflow-x-auto rounded-2xl"
               >
                 <p className="border-b border-line/80 px-4 py-3 text-xs font-semibold uppercase text-fg-subtle">
                   Utilisateurs ({result.users.length})

@@ -81,7 +81,7 @@ export default function ImageCompareSlider({
           alt="Après"
           draggable={false}
           onLoad={syncFrame}
-          className="block max-h-[calc(100dvh-14rem)] max-w-full object-contain lg:max-h-[calc(100vh-12rem)]"
+          className="block max-h-[calc(100dvh-12rem)] max-w-full object-contain md:max-h-[calc(100dvh-10rem)]"
         />
 
         <div

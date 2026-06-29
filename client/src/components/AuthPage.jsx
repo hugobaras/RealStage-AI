@@ -11,7 +11,13 @@ const BENEFITS = [
 ];
 
 export default function AuthPage() {
-  const { signIn, signUp, signInWithGoogle, firebaseConfigured } = useAuth();
+  const {
+    signIn,
+    signUp,
+    signInWithGoogle,
+    sendPasswordReset,
+    firebaseConfigured,
+  } = useAuth();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState(() =>
     searchParams.get("mode") === "signup" ? "signup" : "login",
@@ -20,17 +26,25 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   const isSignup = mode === "signup";
+  const isForgot = mode === "forgot";
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
+    setSuccess(null);
     setSubmitting(true);
 
     try {
-      if (isSignup) {
+      if (isForgot) {
+        await sendPasswordReset(email);
+        setSuccess(
+          "Si un compte existe avec cette adresse, un e-mail de réinitialisation vient d'être envoyé. Consultez votre boîte de réception.",
+        );
+      } else if (isSignup) {
         await signUp(email, password, displayName);
       } else {
         await signIn(email, password);
@@ -42,8 +56,18 @@ export default function AuthPage() {
     }
   };
 
+  const switchMode = (nextMode) => {
+    setMode(nextMode);
+    setError(null);
+    setSuccess(null);
+    if (nextMode !== "forgot") {
+      setPassword("");
+    }
+  };
+
   const handleGoogle = async () => {
     setError(null);
+    setSuccess(null);
     setSubmitting(true);
     try {
       await signInWithGoogle();
@@ -78,7 +102,7 @@ export default function AuthPage() {
 
   return (
     <div className="app-themed page-bg flex min-h-screen">
-      <aside className="relative hidden w-[45%] overflow-hidden border-r border-line/80 lg:flex lg:flex-col lg:justify-between">
+      <aside className="relative hidden w-[45%] overflow-hidden border-r border-line/80 md:flex md:flex-col md:justify-between">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-20 top-0 h-96 w-96 rounded-full bg-accent/20 blur-[100px]" />
           <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-accent-light/10 blur-[80px]" />
@@ -168,44 +192,46 @@ export default function AuthPage() {
                 </span>
               </div>
 
-              <div className="surface-card mb-6 flex p-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("login");
-                    setError(null);
-                  }}
-                  className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
-                    !isSignup
-                      ? "mode-pill-active"
-                      : "text-fg-muted hover:text-fg"
-                  }`}
-                >
-                  Connexion
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("signup");
-                    setError(null);
-                  }}
-                  className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
-                    isSignup
-                      ? "mode-pill-active"
-                      : "text-fg-muted hover:text-fg"
-                  }`}
-                >
-                  Inscription
-                </button>
-              </div>
+              {!isForgot && (
+                <div className="surface-card mb-6 flex p-1">
+                  <button
+                    type="button"
+                    onClick={() => switchMode("login")}
+                    className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
+                      mode === "login"
+                        ? "mode-pill-active"
+                        : "text-fg-muted hover:text-fg"
+                    }`}
+                  >
+                    Connexion
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => switchMode("signup")}
+                    className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
+                      isSignup
+                        ? "mode-pill-active"
+                        : "text-fg-muted hover:text-fg"
+                    }`}
+                  >
+                    Inscription
+                  </button>
+                </div>
+              )}
 
               <h1 className="font-display text-2xl font-semibold text-fg">
-                {isSignup ? "Créer un compte" : "Bon retour"}
+                {isForgot
+                  ? "Mot de passe oublié"
+                  : isSignup
+                    ? "Créer un compte"
+                    : "Bon retour"}
               </h1>
               <p className="mt-2 text-sm text-fg-muted">
-                {isSignup
-                  ? `${TRIAL_LIMIT} essais gratuits, sans carte bancaire.`
-                  : "Connectez-vous pour accéder à votre studio."}
+                {isForgot
+                  ? "Saisissez votre e-mail pour recevoir un lien de réinitialisation."
+                  : isSignup
+                    ? `${TRIAL_LIMIT} essais gratuits, sans carte bancaire.`
+                    : "Connectez-vous pour accéder à votre studio."}
               </p>
             </div>
 
@@ -246,26 +272,47 @@ export default function AuthPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="section-label mb-2 block">
-                  Mot de passe
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field"
-                  placeholder="••••••••"
-                  autoComplete={isSignup ? "new-password" : "current-password"}
-                />
-              </div>
+              {!isForgot && (
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <label htmlFor="password" className="section-label">
+                      Mot de passe
+                    </label>
+                    {!isSignup && (
+                      <button
+                        type="button"
+                        onClick={() => switchMode("forgot")}
+                        className="text-xs font-medium text-accent-light transition hover:text-accent"
+                      >
+                        Mot de passe oublié ?
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-field"
+                    placeholder="••••••••"
+                    autoComplete={
+                      isSignup ? "new-password" : "current-password"
+                    }
+                  />
+                </div>
+              )}
 
               {error && (
                 <p className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
                   {error}
+                </p>
+              )}
+
+              {success && (
+                <p className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300">
+                  {success}
                 </p>
               )}
 
@@ -276,27 +323,43 @@ export default function AuthPage() {
               >
                 {submitting
                   ? "Chargement…"
-                  : isSignup
-                    ? "Créer mon compte"
-                    : "Se connecter"}
+                  : isForgot
+                    ? "Envoyer le lien"
+                    : isSignup
+                      ? "Créer mon compte"
+                      : "Se connecter"}
               </button>
+
+              {isForgot && (
+                <button
+                  type="button"
+                  onClick={() => switchMode("login")}
+                  className="w-full text-center text-sm text-fg-muted transition hover:text-fg"
+                >
+                  Retour à la connexion
+                </button>
+              )}
             </form>
 
-            <div className="my-6 flex items-center gap-3">
-              <div className="h-px flex-1 bg-line" />
-              <span className="text-xs text-fg-muted">ou</span>
-              <div className="h-px flex-1 bg-line" />
-            </div>
+            {!isForgot && (
+              <>
+                <div className="my-6 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-line" />
+                  <span className="text-xs text-fg-muted">ou</span>
+                  <div className="h-px flex-1 bg-line" />
+                </div>
 
-            <button
-              type="button"
-              onClick={handleGoogle}
-              disabled={submitting}
-              className="btn-secondary flex w-full items-center justify-center gap-2.5"
-            >
-              <GoogleIcon />
-              Continuer avec Google
-            </button>
+                <button
+                  type="button"
+                  onClick={handleGoogle}
+                  disabled={submitting}
+                  className="btn-secondary flex w-full items-center justify-center gap-2.5"
+                >
+                  <GoogleIcon />
+                  Continuer avec Google
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

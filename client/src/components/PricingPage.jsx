@@ -10,7 +10,7 @@ import {
 } from "../constants/plans";
 import { useSubscription } from "../contexts/SubscriptionContext";
 import AppShell from "./AppShell";
-import MobileAppNav from "./MobileAppNav";
+import SecondaryPageLayout from "./SecondaryPageLayout";
 import StripeCheckoutModal from "./StripeCheckoutModal";
 import { isStripePublishableKeyConfigured } from "../lib/stripe";
 
@@ -160,14 +160,13 @@ export default function PricingPage() {
 
   return (
     <AppShell>
-      <div className="page-bg flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <SecondaryPageLayout>
+        <div className="page-bg relative flex-1">
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
           <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-accent/10 blur-[120px]" />
           <div className="absolute -right-32 top-1/3 h-80 w-80 rounded-full bg-accent-light/8 blur-[100px]" />
           <div className="app-grid-bg absolute inset-0 opacity-40" />
         </div>
-
-        <MobileAppNav />
 
         <main className="relative mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
           <div className="mx-auto mb-12 max-w-2xl text-center">
@@ -212,7 +211,7 @@ export default function PricingPage() {
             </p>
           )}
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {PLANS.map((p) => (
               <PlanCard
                 key={p.id}
@@ -238,7 +237,8 @@ export default function PricingPage() {
           planLabel={checkoutSession?.planLabel}
           onClose={closeCheckout}
         />
-      </div>
+        </div>
+      </SecondaryPageLayout>
     </AppShell>
   );
 }

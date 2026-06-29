@@ -39,7 +39,7 @@ export default function RoomChecklist({
           {essentialDone}/{essentialTotal} essentielles
         </span>
       </div>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-0.5 scrollbar-thin md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0">
         {ESSENTIAL_ROOMS.map((roomId) => {
           const status = roomStatus[roomId] ?? "missing";
           const active = currentRoomType === roomId;
@@ -48,7 +48,7 @@ export default function RoomChecklist({
               key={roomId}
               type="button"
               onClick={() => onRoomSelect(roomId)}
-              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition ${
+              className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium transition ${
                 active
                   ? `${theme.bg} text-white`
                   : status === "done"

@@ -175,6 +175,8 @@ export default function HistoryPanel({
   onReport,
   expanded = true,
   onExpandedChange,
+  showHeader = true,
+  placement = "bottom",
 }) {
   const theme = getModeTheme(mode);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -191,11 +193,91 @@ export default function HistoryPanel({
     ? `${displayedHistory.length} favori(s)`
     : `${history.length} génération(s)`;
 
+  const borderClass =
+    placement === "top" ? "border-b border-line/80" : "border-t border-line/80";
+  const cardsPadding =
+    placement === "top"
+      ? "px-3 pb-2 pt-0"
+      : "overflow-x-auto px-3 pb-3 pl-3 pr-[4.5rem] md:px-3 md:pr-3 lg:pr-3";
+
   const toggleExpanded = () => onExpandedChange?.(!expanded);
+
+  const historyCards = (
+    <>
+      {loading &&
+        Array.from({ length: PLACEHOLDER_COUNT }).map((_, i) => (
+          <div
+            key={`loading-${i}`}
+            className="h-[96px] w-[112px] shrink-0 animate-pulse rounded-xl bg-elevated/60"
+          />
+        ))}
+
+      {!loading && isEmpty && (
+        <p className="py-2 text-xs text-muted">
+          Vos générations apparaîtront ici.
+        </p>
+      )}
+
+      {!loading &&
+        !isEmpty &&
+        favoritesOnly &&
+        displayedHistory.length === 0 && (
+          <p className="py-2 text-xs text-muted">
+            Aucun favori pour le moment.
+          </p>
+        )}
+
+      {!loading &&
+        displayedHistory.map((item) => (
+          <HistoryCard
+            key={item.id}
+            item={item}
+            isSelected={item.id === selectedId}
+            theme={theme}
+            onSelect={onSelect}
+            onUseAsBase={onUseAsBase}
+            onDownload={onDownload}
+            onToggleFavorite={onToggleFavorite}
+            onExportPack={onExportPack}
+            onReport={onReport}
+          />
+        ))}
+    </>
+  );
+
+  if (!showHeader) {
+    return (
+      <div className="flex flex-col">
+        {favoriteCount > 0 && (
+          <div className="mb-2 flex justify-end px-1">
+            <button
+              type="button"
+              onClick={() => setFavoritesOnly((v) => !v)}
+              className={`flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition ${
+                favoritesOnly
+                  ? `${theme.bg} text-white`
+                  : "text-muted hover:text-fg-subtle"
+              }`}
+            >
+              <Star
+                className={`h-3 w-3 ${favoritesOnly ? "fill-current" : ""}`}
+              />
+              Favoris ({favoriteCount})
+            </button>
+          </div>
+        )}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          {historyCards}
+        </div>
+      </div>
+    );
+  }
 
   if (!expanded) {
     return (
-      <div className="flex shrink-0 items-center justify-between gap-2 border-t border-line/80 bg-panel/80 px-3 py-1.5 backdrop-blur-sm">
+      <div
+        className={`flex shrink-0 items-center justify-between gap-2 bg-panel/80 px-3 py-1.5 backdrop-blur-sm ${borderClass}`}
+      >
         <button
           type="button"
           onClick={toggleExpanded}
@@ -225,7 +307,9 @@ export default function HistoryPanel({
   }
 
   return (
-    <div className="flex shrink-0 flex-col border-t border-line/80 bg-panel/80 backdrop-blur-sm">
+    <div
+      className={`flex shrink-0 flex-col bg-panel/80 backdrop-blur-sm ${borderClass}`}
+    >
       <div className="flex shrink-0 items-center justify-between gap-2 px-3 py-2">
         <button
           type="button"
@@ -261,45 +345,10 @@ export default function HistoryPanel({
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto px-3 pb-3 scrollbar-thin">
-        {loading &&
-          Array.from({ length: PLACEHOLDER_COUNT }).map((_, i) => (
-            <div
-              key={`loading-${i}`}
-              className="h-[96px] w-[112px] shrink-0 animate-pulse rounded-xl bg-elevated/60"
-            />
-          ))}
-
-        {!loading && isEmpty && (
-          <p className="py-2 text-xs text-muted">
-            Vos générations apparaîtront ici.
-          </p>
-        )}
-
-        {!loading &&
-          !isEmpty &&
-          favoritesOnly &&
-          displayedHistory.length === 0 && (
-            <p className="py-2 text-xs text-muted">
-              Aucun favori pour le moment.
-            </p>
-          )}
-
-        {!loading &&
-          displayedHistory.map((item) => (
-            <HistoryCard
-              key={item.id}
-              item={item}
-              isSelected={item.id === selectedId}
-              theme={theme}
-              onSelect={onSelect}
-              onUseAsBase={onUseAsBase}
-              onDownload={onDownload}
-              onToggleFavorite={onToggleFavorite}
-              onExportPack={onExportPack}
-              onReport={onReport}
-            />
-          ))}
+      <div
+        className={`flex gap-2 overflow-x-auto scrollbar-thin ${cardsPadding}`}
+      >
+        {historyCards}
       </div>
     </div>
   );

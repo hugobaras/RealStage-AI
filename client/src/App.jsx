@@ -59,7 +59,7 @@ function AppContent() {
     <SubscriptionProvider>
       <AdminProvider>
         <CatalogProvider>
-          <div className="app-themed flex h-[100dvh] flex-col overflow-hidden lg:h-screen">
+          <div className="app-themed flex h-[100dvh] flex-col overflow-hidden">
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <Routes>
                 <Route path="/" element={<MainLayout />} />

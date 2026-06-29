@@ -25,7 +25,7 @@ export default function MobileAppNav() {
   const { hasFeature } = useSubscription();
 
   return (
-    <nav className="flex shrink-0 gap-1 border-b border-line/80 bg-panel/90 px-2 py-1.5 lg:hidden">
+    <nav className="hidden shrink-0 gap-1 border-b border-line/80 bg-panel/90 px-2 py-1.5 md:flex lg:hidden">
       {ITEMS.filter((item) => !item.feature || hasFeature(item.feature)).map(
         ({ id, to, icon: Icon, label }) => (
           <NavLink

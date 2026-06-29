@@ -42,8 +42,6 @@ const SECONDARY_NAV = [
   },
 ];
 
-const SIDEBAR_WIDTH = "w-24";
-
 function secondaryIsActive(pathname, to) {
   if (to === "/pricing") return pathname === "/pricing";
   if (to === "/properties") return pathname.startsWith("/properties");
@@ -51,7 +49,7 @@ function secondaryIsActive(pathname, to) {
   return pathname === to;
 }
 
-function ModeNavButton({ id, icon: Icon, active, onClick }) {
+function ModeNavButton({ id, icon: Icon, active, onClick, compact }) {
   const config = MODES[id];
   const tabTheme = getModeTabTheme(id);
   const navLabel = config.navLabel ?? config.label;
@@ -78,9 +76,16 @@ function ModeNavButton({ id, icon: Icon, active, onClick }) {
         className={`h-5 w-5 ${active ? "" : "opacity-70 group-hover:opacity-100"}`}
         strokeWidth={active ? 2.25 : 1.5}
       />
-      <span className="max-w-full text-center text-[10px] font-semibold leading-tight">
-        {navLabel}
-      </span>
+      {!compact && (
+        <span className="max-w-full text-center text-[10px] font-semibold leading-tight">
+          {navLabel}
+        </span>
+      )}
+      {compact && (
+        <span className="hidden max-w-full text-center text-[10px] font-semibold leading-tight lg:block">
+          {navLabel}
+        </span>
+      )}
     </button>
   );
 }
@@ -102,11 +107,11 @@ export default function Sidebar({ activeMode, onModeChange }) {
 
   return (
     <aside
-      className={`relative hidden h-full ${SIDEBAR_WIDTH} shrink-0 flex-col items-center border-r border-line/80 bg-panel py-5 lg:flex`}
+      className="relative hidden h-full w-[var(--layout-sidebar-compact)] shrink-0 flex-col items-center border-r border-line/80 bg-panel py-4 md:flex lg:w-[var(--layout-sidebar-width)] lg:py-5"
     >
       <Link
         to="/"
-        className={`mb-6 flex h-11 w-11 items-center justify-center rounded-2xl ${
+        className={`mb-4 flex h-10 w-10 items-center justify-center rounded-2xl lg:mb-6 lg:h-11 lg:w-11 ${
           isEditor && activeTheme.logoActive
             ? activeTheme.logoActive
             : "bg-gradient-to-br from-accent/30 to-accent-light/10 shadow-lg shadow-accent/20 ring-1 ring-accent/30"
@@ -116,13 +121,13 @@ export default function Sidebar({ activeMode, onModeChange }) {
         <img
           src="/realstage-logo.png"
           alt="RealStage AI"
-          className="h-8 w-8 object-contain"
+          className="h-7 w-7 object-contain lg:h-8 lg:w-8"
         />
       </Link>
 
       <nav
         aria-label="Mode"
-        className="flex w-full flex-col items-stretch px-2"
+        className="flex w-full flex-col items-stretch px-1.5 lg:px-2"
       >
         <div className="flex flex-col gap-1 rounded-2xl border border-line/80 bg-elevated/40 p-1">
           {NAV_ITEMS.map(({ id, icon }) => (
@@ -132,14 +137,17 @@ export default function Sidebar({ activeMode, onModeChange }) {
               icon={icon}
               active={isEditor && activeMode === id}
               onClick={handleModeClick}
+              compact
             />
           ))}
         </div>
       </nav>
 
-      <div className="mt-auto flex w-full flex-col gap-2 px-2 pb-2">
+      <div className="mt-auto flex w-full flex-col gap-2 px-1.5 pb-2 lg:px-2">
         <div className="my-2 border-t border-line/60" aria-hidden="true" />
-        <ThemeToggle compact />
+        <div className="hidden lg:block">
+          <ThemeToggle compact />
+        </div>
         {SECONDARY_NAV.filter(
           (item) => !item.feature || hasFeature(item.feature),
         ).map(({ id, to, icon: Icon, label }) => {
@@ -150,7 +158,7 @@ export default function Sidebar({ activeMode, onModeChange }) {
             <NavLink
               key={id}
               to={to}
-              className={`relative flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 transition ${
+              className={`relative flex flex-col items-center gap-1.5 rounded-2xl px-2 py-2.5 transition lg:py-3 ${
                 active
                   ? `${tabTheme.bgSubtle} ${tabTheme.text} ring-1 ${tabTheme.border}`
                   : "text-fg-subtle hover:bg-elevated/80 hover:text-fg"
@@ -163,7 +171,7 @@ export default function Sidebar({ activeMode, onModeChange }) {
                 />
               )}
               <Icon className="h-5 w-5" />
-              <span className="max-w-full truncate text-center text-[10px] font-semibold leading-tight">
+              <span className="hidden max-w-full truncate text-center text-[10px] font-semibold leading-tight lg:block">
                 {label}
               </span>
             </NavLink>
@@ -172,7 +180,7 @@ export default function Sidebar({ activeMode, onModeChange }) {
         {isAdmin && (
           <NavLink
             to="/admin"
-            className={`relative flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 transition ${
+            className={`relative flex flex-col items-center gap-1.5 rounded-2xl px-2 py-2.5 transition lg:py-3 ${
               location.pathname.startsWith("/admin")
                 ? "bg-violet-500/15 text-violet-300 ring-1 ring-violet-500/30"
                 : "text-fg-subtle hover:bg-elevated/80 hover:text-fg"
@@ -180,7 +188,7 @@ export default function Sidebar({ activeMode, onModeChange }) {
             title="Administration"
           >
             <Shield className="h-5 w-5" />
-            <span className="max-w-full truncate text-center text-[10px] font-semibold leading-tight">
+            <span className="hidden max-w-full truncate text-center text-[10px] font-semibold leading-tight lg:block">
               Admin
             </span>
           </NavLink>

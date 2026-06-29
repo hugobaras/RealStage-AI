@@ -1,12 +1,5 @@
 import { useRef } from "react";
-import {
-  Download,
-  Flag,
-  Image as ImageIcon,
-  Loader2,
-  RefreshCw,
-  Star,
-} from "lucide-react";
+import { Download, Flag, Loader2, RefreshCw, Star, Upload } from "lucide-react";
 import { MODES } from "../constants/modes";
 import { getModeTheme } from "../utils/modeTheme";
 import ImageCompareSlider from "./ImageCompareSlider";
@@ -44,6 +37,7 @@ export default function ImageCanvas({
   const inputRef = useRef(null);
   const showCompare =
     Boolean(beforeImage) && Boolean(afterImage) && beforeImage !== afterImage;
+  const isEmpty = !beforeImage && !afterImage;
 
   const processFiles = (files) => {
     if (!files?.length || loading) return;
@@ -71,11 +65,11 @@ export default function ImageCanvas({
   };
 
   return (
-    <section className="relative flex min-h-0 flex-1 flex-col gap-2 p-2 lg:h-full lg:min-h-0 lg:gap-3 lg:p-5">
+    <section className="relative flex min-h-[10rem] min-w-0 flex-1 flex-col gap-2 p-2 lg:h-full lg:min-h-0 lg:gap-3 lg:p-5">
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        className={`relative min-h-0 flex-1 ${theme.canvasFrame}`}
+        className={`relative flex min-h-[min(36dvh,18rem)] flex-1 flex-col ${theme.canvasFrame} ${isEmpty ? "min-h-[min(40dvh,20rem)]" : ""}`}
       >
         <input
           ref={inputRef}
@@ -107,7 +101,29 @@ export default function ImageCanvas({
               mode={mode}
             />
           )
-        ) : afterImage ? (
+        ) : isEmpty ? (
+          <button
+            type="button"
+            onClick={openFilePicker}
+            disabled={loading}
+            className="flex flex-1 cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-line bg-elevated/30 p-6 m-3 text-center transition hover:border-accent/60 hover:bg-accent/5 active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-60 sm:m-4"
+          >
+            <div
+              className={`flex h-12 w-12 items-center justify-center rounded-2xl ring-1 ${theme.dropZoneIcon}`}
+            >
+              <Upload className="h-6 w-6 text-fg-muted" strokeWidth={1.5} />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-fg">
+                Cliquez pour ajouter une photo
+              </p>
+              <p className="mt-1.5 text-sm text-fg-muted">
+                ou glissez-déposez une image ici
+              </p>
+              <p className="mt-1 text-xs text-fg-subtle">JPG, PNG, WebP</p>
+            </div>
+          </button>
+        ) : (
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <img
               src={afterImage}
@@ -115,42 +131,10 @@ export default function ImageCanvas({
               className="max-h-full max-w-full object-contain object-center"
             />
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={openFilePicker}
-            disabled={loading}
-            className="absolute inset-4 flex w-[calc(100%-2rem)] flex-col items-center justify-center gap-4 rounded-2xl text-center transition disabled:cursor-not-allowed sm:inset-8"
-          >
-            <div
-              className={`${theme.dropZone} flex flex-col items-center gap-4 px-8 py-12 sm:px-16 sm:py-14`}
-            >
-              <div
-                className={`flex h-20 w-20 items-center justify-center rounded-3xl ring-2 ${theme.dropZoneIcon}`}
-              >
-                <ImageIcon className="h-10 w-10" strokeWidth={1.25} />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-white sm:text-2xl">
-                  Glissez vos photos ici
-                </p>
-                <p className="mx-auto mt-2 max-w-md text-sm text-zinc-400">
-                  Une photo ou plusieurs d&apos;un coup — idéal pour enchaîner
-                  pièce par pièce.
-                </p>
-              </div>
-              <span
-                className={`rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg ${theme.dropZoneCta}`}
-              >
-                Cliquer pour importer
-              </span>
-              <p className="text-xs text-zinc-500">JPG, PNG, WebP</p>
-            </div>
-          </button>
         )}
 
         {hasResult && !loading && (
-          <div className="absolute right-3 top-3 z-10 flex items-center gap-0.5 rounded-xl border border-zinc-700/80 bg-panel/90 p-1 shadow-lg backdrop-blur-md">
+          <div className="absolute right-2 top-2 z-10 flex max-w-[calc(100%-1rem)] flex-wrap items-center justify-end gap-0.5 rounded-xl border border-zinc-700/80 bg-panel/90 p-1 shadow-lg backdrop-blur-md sm:right-3 sm:top-3">
             {generationId && onToggleFavorite && (
               <button
                 type="button"

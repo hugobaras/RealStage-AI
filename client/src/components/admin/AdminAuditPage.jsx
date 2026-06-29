@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { fetchAdminAudit } from "../../api/admin";
+import AdminDataTable from "./AdminDataTable";
 
 const ACTION_LABELS = {
   patch_user: "Modification utilisateur",
@@ -112,73 +113,66 @@ export default function AdminAuditPage() {
         </div>
       )}
 
-      <div className="surface-card overflow-hidden rounded-2xl">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-line/80 bg-elevated/40 text-fg-muted">
-            <tr>
-              <th className="px-4 py-3 font-medium">Date</th>
-              <th className="px-4 py-3 font-medium">Admin</th>
-              <th className="px-4 py-3 font-medium">Action</th>
-              <th className="px-4 py-3 font-medium">Cible</th>
-              <th className="px-4 py-3 font-medium">Détails</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map((entry) => (
-              <tr
-                key={entry.id}
-                className="border-b border-line/40 hover:bg-elevated/30"
-              >
-                <td className="px-4 py-3 text-fg-muted">
-                  {formatDate(entry.createdAt)}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="text-fg">{entry.adminEmail ?? "—"}</div>
-                  <div className="text-xs text-fg-subtle">{entry.adminUid}</div>
-                </td>
-                <td className="px-4 py-3 text-fg">
-                  {ACTION_LABELS[entry.action] ?? entry.action}
-                </td>
-                <td className="px-4 py-3">
-                  <code className="text-xs text-fg-muted">{entry.target}</code>
-                </td>
-                <td className="px-4 py-3">
-                  {entry.details ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setExpanded(expanded === entry.id ? null : entry.id)
-                      }
-                      className="text-xs text-accent-light hover:underline"
-                    >
-                      {expanded === entry.id ? "Masquer" : "Voir"}
-                    </button>
-                  ) : (
-                    "—"
-                  )}
+      <AdminDataTable
+        loading={loading}
+        rows={entries}
+        rowKey={(entry) => entry.id}
+        emptyMessage="Aucune entrée d'audit."
+        columns={[
+          {
+            key: "date",
+            label: "Date",
+            render: (entry) => formatDate(entry.createdAt),
+          },
+          {
+            key: "admin",
+            label: "Admin",
+            render: (entry) => (
+              <>
+                <div>{entry.adminEmail ?? "—"}</div>
+                <div className="text-xs text-fg-subtle">{entry.adminUid}</div>
+              </>
+            ),
+          },
+          {
+            key: "action",
+            label: "Action",
+            render: (entry) => ACTION_LABELS[entry.action] ?? entry.action,
+          },
+          {
+            key: "target",
+            label: "Cible",
+            render: (entry) => (
+              <code className="text-xs">{entry.target}</code>
+            ),
+          },
+          {
+            key: "details",
+            label: "Détails",
+            render: (entry) =>
+              entry.details ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpanded(expanded === entry.id ? null : entry.id)
+                    }
+                    className="text-xs text-accent-light hover:underline"
+                  >
+                    {expanded === entry.id ? "Masquer" : "Voir"}
+                  </button>
                   {expanded === entry.id && (
-                    <pre className="mt-2 max-w-xs overflow-x-auto rounded bg-elevated p-2 text-xs text-fg-muted">
+                    <pre className="mt-2 max-w-full overflow-x-auto rounded bg-elevated p-2 text-xs text-fg-muted">
                       {JSON.stringify(entry.details, null, 2)}
                     </pre>
                   )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {loading && (
-          <div className="flex justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-accent" />
-          </div>
-        )}
-
-        {!loading && entries.length === 0 && (
-          <p className="py-8 text-center text-sm text-fg-muted">
-            Aucune entrée d&apos;audit.
-          </p>
-        )}
-      </div>
+                </>
+              ) : (
+                "—"
+              ),
+          },
+        ]}
+      />
 
       {nextCursor && (
         <button

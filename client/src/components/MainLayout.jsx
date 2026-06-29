@@ -2,10 +2,11 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import AppShell from "./AppShell";
 import TopBar from "./TopBar";
-import MobileModeBar from "./MobileModeBar";
-import MobileBottomNav from "./MobileBottomNav";
 import ControlPanel from "./ControlPanel";
 import ControlsDrawer from "./ControlsDrawer";
+import BottomSheet from "./ui/BottomSheet";
+import AppMenuDrawer from "./AppMenuDrawer";
+import MobileEditorBar from "./MobileEditorBar";
 import ImageCanvas from "./ImageCanvas";
 import HistoryPanel from "./HistoryPanel";
 import WorkflowBar from "./WorkflowBar";
@@ -61,6 +62,7 @@ import {
 } from "../utils/exportPack";
 import { normalizeExportLabel } from "../constants/exportLabel";
 import { getDefaultVariantStyles } from "./VariantPicker";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 const ACTIVE_PROPERTY_KEY = "realstage_active_property";
 
@@ -154,8 +156,10 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   const [error, setError] = useState(null);
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [mobileTab, setMobileTab] = useState("canvas");
-  const [historyExpanded, setHistoryExpanded] = useState(true);
+  const [controlsSheetOpen, setControlsSheetOpen] = useState(false);
+  const [menuDrawerOpen, setMenuDrawerOpen] = useState(false);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
+  const { isPhone, isMdUp } = useBreakpoint();
 
   const [batchState, setBatchState] = useState(null);
   const batchCancelRef = useRef(false);
@@ -1088,6 +1092,13 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
     ) : null;
 
   useEffect(() => {
+    if (isMdUp) {
+      setControlsSheetOpen(false);
+      setMenuDrawerOpen(false);
+    }
+  }, [isMdUp]);
+
+  useEffect(() => {
     function onKeyDown(e) {
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "Enter") {
@@ -1107,16 +1118,8 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   const totalQueuePhotos = photoQueue.length + (baseImage ? 1 : 0);
 
   const showWorkflowBar = listingMode && hasFeature("listingWorkflow");
-
-  const mobileControlsClass =
-    mobileTab === "controls"
-      ? "flex min-h-0 flex-1 flex-col overflow-y-auto lg:hidden"
-      : "hidden";
-
-  const workspaceClass =
-    mobileTab === "canvas"
-      ? "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex-row"
-      : "relative hidden min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex lg:flex-row";
+  const showInlineControls = isPhone && !baseImage;
+  const showMobileEditorChrome = isPhone && Boolean(baseImage);
 
   const controlPanelProps = {
     mode,
@@ -1171,11 +1174,12 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
   return (
     <div
       data-mode={mode}
-      className={`app-themed flex h-[100dvh] flex-col overflow-hidden lg:h-screen lg:flex-row ${getAppBgClass(mode)}`}
+      data-mobile-editor={showMobileEditorChrome ? "" : undefined}
+      className={`app-themed flex h-[100dvh] flex-col overflow-hidden ${getAppBgClass(mode)}`}
     >
       <div className="app-grid-bg pointer-events-none fixed inset-0 opacity-50" />
       <AppShell activeMode={mode} onModeChange={setMode}>
-        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col pb-[calc(3.25rem+env(safe-area-inset-bottom))] lg:pb-0">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <TopBar
             mode={mode}
             properties={properties}
@@ -1190,6 +1194,7 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
               setPropertyCreateOpen(true);
             }}
             hasFeature={hasFeature}
+            onMenuOpen={() => setMenuDrawerOpen(true)}
           />
           {showWorkflowBar && (
             <WorkflowBar
@@ -1243,49 +1248,72 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
           <AnnouncementBanner />
           <TrialBanner mode={mode} />
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className={mobileControlsClass}>
-              <ControlPanel {...controlPanelProps} />
-            </div>
-
-            <div className={workspaceClass}>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
+            {isMdUp && (
               <ControlsDrawer>
                 <ControlPanel {...controlPanelProps} />
               </ControlsDrawer>
+            )}
 
-              <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-                <div className="relative min-h-0 flex-1 overflow-hidden">
-                  <ImageCanvas
-                    mode={mode}
-                    beforeImage={baseImage}
-                    afterImage={previewImage}
-                    loading={loading}
-                    adjusting={adjusting}
-                    loadingLabel={MODES[mode]?.loadingLabel}
-                    hasResult={hasResult}
-                    queueCount={photoQueue.length}
-                    activeVariants={activeVariants}
-                    selectedVariantIndex={selectedVariantIndex}
-                    onVariantSelect={handleVariantSelect}
-                    variantCompareEnabled={hasFeature("variantCompare")}
-                    onImageLoaded={(dataUrl) => handleImageLoaded(dataUrl)}
-                    onImagesQueued={handleImagesQueued}
-                    onUseAsBase={() => useResultAsBase()}
-                    onNextPhoto={startNextPhoto}
-                    onDownload={() => handleDownload()}
-                    onExportPack={() => handleExportPack()}
-                    onChainDeclutterToFurnish={handleChainDeclutterToFurnish}
-                    generationId={activeGeneration?.id ?? null}
-                    onReport={() => openReportModal()}
-                    isFavorite={activeGeneration?.favorite ?? false}
-                    onToggleFavorite={
-                      activeGeneration
-                        ? () => handleToggleFavorite(activeGeneration)
-                        : undefined
-                    }
-                  />
-                </div>
+            <div
+              className={`relative flex min-w-0 flex-1 flex-col overflow-hidden ${showMobileEditorChrome ? "pb-[calc(var(--layout-mobile-bar-height)+var(--layout-safe-bottom))]" : ""}`}
+            >
+              {isPhone && (
+                <HistoryPanel
+                  mode={mode}
+                  history={filteredHistory}
+                  loading={historyLoading}
+                  selectedId={selectedHistoryId}
+                  propertyLabel={activeProperty?.label}
+                  onSelect={handleHistorySelect}
+                  onUseAsBase={(entry) => useResultAsBase(entry.imageUrl)}
+                  onDownload={handleDownload}
+                  onToggleFavorite={handleToggleFavorite}
+                  onExportPack={handleExportPack}
+                  onReport={openReportModal}
+                  expanded={historyExpanded}
+                  onExpandedChange={setHistoryExpanded}
+                  placement="top"
+                />
+              )}
 
+              {showInlineControls && (
+                <ControlPanel {...controlPanelProps} compactInline />
+              )}
+
+              <div className="relative flex min-h-[min(38dvh,16rem)] min-w-0 flex-1 flex-col overflow-hidden md:min-h-0">
+                <ImageCanvas
+                  mode={mode}
+                  beforeImage={baseImage}
+                  afterImage={previewImage}
+                  loading={loading}
+                  adjusting={adjusting}
+                  loadingLabel={MODES[mode]?.loadingLabel}
+                  hasResult={hasResult}
+                  queueCount={photoQueue.length}
+                  activeVariants={activeVariants}
+                  selectedVariantIndex={selectedVariantIndex}
+                  onVariantSelect={handleVariantSelect}
+                  variantCompareEnabled={hasFeature("variantCompare")}
+                  onImageLoaded={(dataUrl) => handleImageLoaded(dataUrl)}
+                  onImagesQueued={handleImagesQueued}
+                  onUseAsBase={() => useResultAsBase()}
+                  onNextPhoto={startNextPhoto}
+                  onDownload={() => handleDownload()}
+                  onExportPack={() => handleExportPack()}
+                  onChainDeclutterToFurnish={handleChainDeclutterToFurnish}
+                  generationId={activeGeneration?.id ?? null}
+                  onReport={() => openReportModal()}
+                  isFavorite={activeGeneration?.favorite ?? false}
+                  onToggleFavorite={
+                    activeGeneration
+                      ? () => handleToggleFavorite(activeGeneration)
+                      : undefined
+                  }
+                />
+              </div>
+
+              {!isPhone && (
                 <HistoryPanel
                   mode={mode}
                   history={filteredHistory}
@@ -1301,16 +1329,44 @@ export default function MainLayout({ propertyIdFromRoute = null }) {
                   expanded={historyExpanded}
                   onExpandedChange={setHistoryExpanded}
                 />
-              </div>
+              )}
             </div>
           </div>
 
-          <MobileModeBar activeMode={mode} onModeChange={setMode} />
+          {showMobileEditorChrome && (
+            <>
+              <MobileEditorBar
+                onOpenControls={() => setControlsSheetOpen(true)}
+                active={controlsSheetOpen}
+                generateActions={{
+                  mode,
+                  baseImage,
+                  loading,
+                  generateLabel,
+                  onGenerateClick: handleGenerateClick,
+                  onBatchGenerateClick: handleBatchGenerateClick,
+                  onVariantsGenerateClick: handleVariantsGenerateClick,
+                  variantStyles,
+                  queueCount: photoQueue.length,
+                  totalQueuePhotos,
+                }}
+              />
+              <BottomSheet
+                open={controlsSheetOpen}
+                onClose={() => setControlsSheetOpen(false)}
+                title="Paramètres"
+                defaultSnap="full"
+              >
+                <ControlPanel {...controlPanelProps} />
+              </BottomSheet>
+            </>
+          )}
 
-          <MobileBottomNav
-            mode={mode}
-            activeTab={mobileTab}
-            onTabChange={setMobileTab}
+          <AppMenuDrawer
+            open={menuDrawerOpen}
+            onClose={() => setMenuDrawerOpen(false)}
+            activeMode={mode}
+            onModeChange={setMode}
           />
         </div>
       </AppShell>

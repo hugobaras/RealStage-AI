@@ -2,22 +2,28 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { fetchAdminAdmins } from "../../api/admin";
+import AdminDataTable from "./AdminDataTable";
 
 export default function AdminAdminsPage() {
   const { getIdToken } = useAuth();
   const [admins, setAdmins] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const idToken = await getIdToken();
-      const data = await fetchAdminAdmins(idToken);
-      setAdmins(data.admins);
+      try {
+        const idToken = await getIdToken();
+        const data = await fetchAdminAdmins(idToken);
+        setAdmins(data.admins);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [getIdToken]);
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-fg">Administrateurs</h2>
+      <h2 className="text-xl font-bold text-fg md:text-2xl">Administrateurs</h2>
       <p className="text-sm text-fg-muted">
         Historique des grants : voir le{" "}
         <Link to="/admin/audit" className="text-accent-light hover:underline">
@@ -25,33 +31,36 @@ export default function AdminAdminsPage() {
         </Link>
         .
       </p>
-      <div className="surface-card overflow-hidden rounded-2xl">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-line/80 bg-elevated/40 text-fg-muted">
-            <tr>
-              <th className="px-4 py-3">E-mail</th>
-              <th className="px-4 py-3">Rôle</th>
-              <th className="px-4 py-3">UID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {admins.map((a) => (
-              <tr key={a.uid} className="border-b border-line/40">
-                <td className="px-4 py-3">
-                  <Link
-                    to={`/admin/users/${a.uid}`}
-                    className="text-accent-light hover:underline"
-                  >
-                    {a.email ?? a.uid}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 capitalize text-fg-muted">{a.role}</td>
-                <td className="px-4 py-3 text-xs text-fg-subtle">{a.uid}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AdminDataTable
+        loading={loading}
+        rows={admins}
+        rowKey={(a) => a.uid}
+        emptyMessage="Aucun administrateur."
+        columns={[
+          {
+            key: "email",
+            label: "E-mail",
+            render: (a) => (
+              <Link
+                to={`/admin/users/${a.uid}`}
+                className="text-accent-light hover:underline"
+              >
+                {a.email ?? a.uid}
+              </Link>
+            ),
+          },
+          {
+            key: "role",
+            label: "Rôle",
+            render: (a) => <span className="capitalize">{a.role}</span>,
+          },
+          {
+            key: "uid",
+            label: "UID",
+            render: (a) => <span className="text-xs">{a.uid}</span>,
+          },
+        ]}
+      />
     </div>
   );
 }

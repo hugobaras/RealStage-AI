@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { fetchAdminUsers } from "../../api/admin";
+import AdminDataTable from "./AdminDataTable";
 
 function planLabel(user) {
   const sub = user.subscription ?? {};
@@ -71,65 +72,55 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      <div className="surface-card overflow-hidden rounded-2xl">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-line/80 bg-elevated/40 text-fg-muted">
-            <tr>
-              <th className="px-4 py-3 font-medium">E-mail</th>
-              <th className="px-4 py-3 font-medium">Forfait</th>
-              <th className="px-4 py-3 font-medium">Usage mois</th>
-              <th className="px-4 py-3 font-medium">Générations</th>
-              <th className="px-4 py-3 font-medium">Admin</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr
-                key={user.uid}
-                className="border-b border-line/40 hover:bg-elevated/30"
-              >
-                <td className="px-4 py-3">
-                  <Link
-                    to={`/admin/users/${user.uid}`}
-                    className="font-medium text-accent-light hover:underline"
-                  >
-                    {user.email ?? user.uid}
-                  </Link>
-                  {user.disabled && (
-                    <span className="ml-2 rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] text-red-300">
-                      désactivé
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 capitalize text-fg-muted">
-                  {planLabel(user)}
-                </td>
-                <td className="px-4 py-3 text-fg-muted">
-                  {user.usage?.count ?? 0}
-                </td>
-                <td className="px-4 py-3 text-fg-muted">
-                  {user.generationCount ?? 0}
-                </td>
-                <td className="px-4 py-3 text-fg-muted">
-                  {user.admin ? "oui" : "—"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {loading && (
-          <div className="flex justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-accent" />
-          </div>
-        )}
-
-        {!loading && users.length === 0 && (
-          <p className="py-8 text-center text-sm text-fg-muted">
-            Aucun utilisateur trouvé.
-          </p>
-        )}
-      </div>
+      <AdminDataTable
+        loading={loading}
+        rows={users}
+        rowKey={(user) => user.uid}
+        emptyMessage="Aucun utilisateur trouvé."
+        columns={[
+          {
+            key: "email",
+            label: "E-mail",
+            render: (user) => (
+              <>
+                <Link
+                  to={`/admin/users/${user.uid}`}
+                  className="font-medium text-accent-light hover:underline"
+                >
+                  {user.email ?? user.uid}
+                </Link>
+                {user.disabled && (
+                  <span className="ml-2 rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] text-red-300">
+                    désactivé
+                  </span>
+                )}
+              </>
+            ),
+          },
+          {
+            key: "plan",
+            label: "Forfait",
+            render: (user) => (
+              <span className="capitalize">{planLabel(user)}</span>
+            ),
+          },
+          {
+            key: "usage",
+            label: "Usage mois",
+            render: (user) => user.usage?.count ?? 0,
+          },
+          {
+            key: "generations",
+            label: "Générations",
+            render: (user) => user.generationCount ?? 0,
+          },
+          {
+            key: "admin",
+            label: "Admin",
+            render: (user) => (user.admin ? "oui" : "—"),
+          },
+        ]}
+      />
 
       {nextPageToken && !search && (
         <button

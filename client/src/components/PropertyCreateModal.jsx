@@ -101,6 +101,7 @@ export function PropertySelector({
   onSelect,
   onCreateClick,
   hasFeature,
+  compact = false,
 }) {
   const theme = getModeTheme(mode);
 
@@ -108,20 +109,21 @@ export function PropertySelector({
     return (
       <Link
         to="/pricing"
-        className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:text-white"
+        className={`rounded-lg border border-zinc-700 text-zinc-400 hover:text-white ${compact ? "px-2 py-1 text-[10px]" : "px-3 py-1.5 text-xs"}`}
       >
-        Multi-projets — forfait Agence
+        {compact ? "Agence" : "Multi-projets — forfait Agence"}
       </Link>
     );
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Building2 className="hidden h-4 w-4 text-zinc-500 sm:block" />
+    <div className="flex items-center gap-1 md:gap-2">
+      <Building2 className="hidden h-4 w-4 text-zinc-500 md:block" />
       <select
         value={activePropertyId ?? ""}
         onChange={(e) => onSelect(e.target.value || null)}
-        className={`max-w-[200px] truncate rounded-lg border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-xs text-white sm:max-w-xs sm:text-sm ${theme.border}`}
+        className={`truncate rounded-lg border border-zinc-700 bg-zinc-900 px-1.5 py-1 text-[11px] text-white md:max-w-xs md:px-2 md:py-1.5 md:text-sm ${compact ? "max-w-[5.5rem] sm:max-w-[7rem]" : "max-w-[200px] sm:max-w-xs"} ${theme.border}`}
+        aria-label="Sélectionner un bien"
       >
         <option value="">Sans bien</option>
         {properties.map((p) => (
@@ -133,7 +135,7 @@ export function PropertySelector({
       <button
         type="button"
         onClick={onCreateClick}
-        className={`flex h-8 w-8 items-center justify-center rounded-lg ${theme.bgSubtle} ${theme.text} ring-1 ${theme.border}`}
+        className={`flex items-center justify-center rounded-lg ${theme.bgSubtle} ${theme.text} ring-1 ${theme.border} ${compact ? "h-7 w-7" : "h-8 w-8"}`}
         title="Nouveau bien"
       >
         <Plus className="h-4 w-4" />

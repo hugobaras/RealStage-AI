@@ -362,7 +362,7 @@ export default function LandingPage() {
             </Reveal>
           </div>
 
-          <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
+          <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
             {STATS.map((stat, i) => (
               <Reveal key={stat.label} delay={i + 1}>
                 <div className="landing-card group p-5 text-center sm:text-left">
@@ -784,7 +784,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <h4 className="landing-label text-accent-light">Produit</h4>
                 <ul className="mt-3 space-y-2">

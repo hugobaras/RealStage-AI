@@ -97,7 +97,7 @@ export default function AdminStripePage() {
       </div>
 
       {(overview.pastDueUsers ?? []).length > 0 && (
-        <section className="surface-card overflow-hidden rounded-2xl">
+        <section className="surface-card overflow-x-auto rounded-2xl">
           <h3 className="border-b border-line/80 px-4 py-3 font-semibold text-fg">
             Abonnements past_due
           </h3>
@@ -121,7 +121,7 @@ export default function AdminStripePage() {
         </section>
       )}
 
-      <section className="surface-card overflow-hidden rounded-2xl">
+      <section className="surface-card overflow-x-auto rounded-2xl">
         <h3 className="border-b border-line/80 px-4 py-3 font-semibold text-fg">
           Derniers webhooks reçus
         </h3>
