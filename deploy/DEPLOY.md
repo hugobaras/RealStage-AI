@@ -1,4 +1,4 @@
-# Déploiement Docker — RealStage AI
+# Déploiement Docker — RealStage
 
 Conteneur unique : **API Express + frontend statique** sur le port **3011** (localhost uniquement).
 
@@ -11,7 +11,7 @@ Conteneur unique : **API Express + frontend statique** sur le port **3011** (loc
 ## Installation rapide
 
 ```bash
-cd /var/www/RealStage-AI
+cd /var/www/RealStage
 
 # 1. Variables d'environnement
 cp .env.production.example .env.production
@@ -40,12 +40,12 @@ Copier `deploy/nginx.conf.example` tel quel (bloc HTTP uniquement) :
 sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/realstage
 sudo ln -sf /etc/nginx/sites-available/realstage /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d realstage-ai.tech -d www.realstage-ai.tech
+sudo certbot --nginx -d votre-domaine.tld -d www.votre-domaine.tld
 ```
 
 Certbot ajoute HTTPS automatiquement. **Ne pas** ajouter de bloc `listen 443` à la main avant d’avoir les certificats.
 
-`CLIENT_URL` dans `.env.production` doit correspondre à l’URL publique (ex. `https://realstage-ai.tech`).
+`CLIENT_URL` dans `.env.production` doit correspondre à l’URL publique (ex. `https://votre-domaine.tld`).
 
 ## Stripe webhook
 
@@ -74,15 +74,15 @@ docker compose --env-file .env.production build --no-cache && docker compose --e
 Après déploiement sur un nouveau domaine, configurer **Firebase Console** :
 
 1. **Authentication → Paramètres → Domaines autorisés**  
-   Ajouter : `realstage-ai.tech` (sans `https://`)
+   Ajouter : `votre-domaine.tld` (sans `https://`)
 
 2. **Authentication → Méthode de connexion → Google**  
    Activer le fournisseur et enregistrer.
 
-3. **Google Cloud Console** (projet `realstage-ai`) → **APIs et services → Identifiants**  
+3. **Google Cloud Console** (votre projet) → **APIs et services → Identifiants**  
    Client OAuth « Web client (auto created by Google Service) » :
-   - **Origines JavaScript autorisées** : `https://realstage-ai.tech`
-   - **URI de redirection** : `https://realstage-ai.firebaseapp.com/__/auth/handler`
+   - **Origines JavaScript autorisées** : `https://votre-domaine.tld`
+   - **URI de redirection** : `https://votre-projet.firebaseapp.com/__/auth/handler`
 
 4. Rebuild Docker si les `VITE_FIREBASE_*` ont changé :
    ```bash

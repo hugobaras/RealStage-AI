@@ -1,6 +1,6 @@
-# RealStage AI
+# RealStage
 
-SaaS de virtual staging IA pour agents immobiliers. Uploadez une photo de pièce vide, composez la disposition avec des placeholders drag-and-drop, choisissez un style, et générez un rendu photoréaliste.
+SaaS de virtual staging pour agents immobiliers. Uploadez une photo de pièce vide, composez la disposition avec des placeholders drag-and-drop, choisissez un style, et générez un rendu photoréaliste.
 
 ## Prérequis
 

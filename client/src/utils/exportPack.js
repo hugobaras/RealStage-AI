@@ -150,7 +150,7 @@ function drawBrandingFooter(
   }
 }
 
-/** Ajoute une bandeau « Image générée par IA » sous une photo exportée. */
+/** Ajoute un bandeau de mention sous une photo exportée. */
 export async function applyImageLabel(imageSrc, text) {
   if (!imageSrc || !text?.trim()) return imageSrc;
 

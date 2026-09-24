@@ -209,7 +209,7 @@ Réponse : Non. Les 3 générations gratuites sont réservées à l'inscription 
       "Catégories de types de pièces : Pièces de vie, Chambres, Cuisine & repas, Salles d'eau & bien-être, Loisirs & détente, Travail & utilitaires, Circulation, Extérieurs.",
     ),
 
-    // —— Réglages IA ——
+    // —— Réglages avancés ——
     chunk(
       "tuning-overview",
       "tuning",

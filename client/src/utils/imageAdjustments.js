@@ -25,7 +25,7 @@ async function resolveImageBlob(imageSrc) {
 }
 
 /**
- * Applique luminosité et température de couleur (traitement local, sans IA).
+ * Applique luminosité et température de couleur (traitement local).
  * brightness / temperature : -100 à 100 (0 = neutre).
  */
 export async function applyImageAdjustments(

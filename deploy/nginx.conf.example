@@ -1,4 +1,4 @@
-# RealStage AI — Nginx reverse proxy vers Docker (127.0.0.1:3011)
+# RealStage — Nginx reverse proxy vers Docker (127.0.0.1:3011)
 #
 # Install:
 #   sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/realstage
@@ -6,7 +6,7 @@
 #   sudo nginx -t && sudo systemctl reload nginx
 #
 # TLS (recommended) — les deux noms de domaine :
-#   sudo certbot --nginx -d realstage-ai.tech -d www.realstage-ai.tech
+#   sudo certbot --nginx -d votre-domaine.tld -d www.votre-domaine.tld
 
 upstream realstage_app {
     server 127.0.0.1:3011;
@@ -17,14 +17,14 @@ upstream realstage_app {
 server {
     listen 80;
     listen [::]:80;
-    server_name www.realstage-ai.tech;
-    return 301 http://realstage-ai.tech$request_uri;
+    server_name www.votre-domaine.tld;
+    return 301 http://votre-domaine.tld$request_uri;
 }
 
 server {
     listen 80;
     listen [::]:80;
-    server_name realstage-ai.tech;
+    server_name votre-domaine.tld;
 
     client_max_body_size 20M;
 
