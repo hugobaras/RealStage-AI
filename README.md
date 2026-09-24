@@ -1,21 +1,44 @@
-# RealStage AI
+# RealStage
 
-SaaS de virtual staging IA pour agents immobiliers. Uploadez une photo de pièce vide, composez la disposition avec des placeholders drag-and-drop, choisissez un style, et générez un rendu photoréaliste.
+Application web de virtual staging pour l’immobilier.
+Chargez une photo de pièce vide, composez la scène dans l’éditeur, puis générez un rendu meublé.
+
+## Fonctionnalités
+
+- Éditeur visuel drag-and-drop (canvas)
+- Génération d’images meublées
+- Mode désencombrement d’image
+- Gestion d’abonnements (Stripe)
+- Chat support connecté à Discord (optionnel)
+
+## Stack
+
+- Frontend : React + Vite
+- Backend : Node.js + Express
+- Temps réel : Socket.io
+- Paiement : Stripe
+- Stockage / auth : Firebase
 
 ## Prérequis
 
 - Node.js 18+
-- Clé API [Fal.ai](https://fal.ai/dashboard)
+- npm 9+
+- Clé API Fal
 
 ## Installation
 
 ```bash
 npm install
 cp server/.env.example server/.env
-# Éditez server/.env et ajoutez votre FAL_KEY
 ```
 
-## Développement
+Renseignez ensuite les variables nécessaires dans `server/.env`, au minimum :
+
+- `FAL_KEY`
+- `STRIPE_SECRET_KEY` et `STRIPE_WEBHOOK_SECRET` (si paiements activés)
+- Variables Firebase (si authentification / stockage activés)
+
+## Lancer en local
 
 ```bash
 npm run dev
@@ -24,22 +47,21 @@ npm run dev
 - Frontend : http://localhost:5173
 - Backend : http://localhost:3001
 
-## Chat support (RAG + Discord)
-
-Utilisateurs connectés : bulle de chat avec assistant Mistral (RAG sur FAQ, forfaits, modes, catalogue).
+## Commandes utiles
 
 ```bash
-# server/.env
-MISTRAL_API_KEY=...
-DISCORD_BOT_TOKEN=...          # optionnel — pont agent humain
-DISCORD_SUPPORT_CHANNEL_ID=...
+# serveur seul
+npm run dev:server
 
+# client seul
+npm run dev:client
+
+# reconstruire l’index de connaissances du chat
 npm run build:rag -w @realstage-ai/server
 ```
 
-Les agents répondent dans un fil Discord ; les messages sont relayés en temps réel dans le widget (Socket.io).
+## Structure du projet
 
-## Structure
-
-- `client/` — React + Fabric.js (éditeur canvas)
-- `server/` — Express + Fal.ai inpainting
+- `client/` : application frontend
+- `server/` : API et logique métier
+- `firebase/` : configuration Firebase
